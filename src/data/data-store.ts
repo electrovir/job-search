@@ -11,7 +11,11 @@ const jobSearchDataStore = localforage.createInstance({
 const dataKey = 'job-search-data';
 
 export async function loadData() {
-    const data = jobSearchDataStore.getItem(dataKey);
+    const data = await jobSearchDataStore.getItem(dataKey);
+
+    if (!data) {
+        return [];
+    }
 
     assertValidShape(data, jobSearchRecordsShape);
 
