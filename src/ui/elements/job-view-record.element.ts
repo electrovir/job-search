@@ -30,7 +30,7 @@ export const JobViewRecord = defineElement<{
                     key,
                     value,
                 ]) => {
-                    if (!check.isString(value) || !value) {
+                    if (!value || !check.isString(value)) {
                         return nothing;
                     }
 
@@ -45,7 +45,15 @@ export const JobViewRecord = defineElement<{
 
         return html`
             <h2>${entryTitle}</h2>
-            <table><tbody>${tableRows}</tbody></table>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>contact date:</th>
+                        <td>${dateString}</td>
+                    </tr>
+                    ${tableRows}
+                </tbody>
+            </table>
         `;
     },
 });
