@@ -1,5 +1,5 @@
 import {check} from '@augment-vir/assert';
-import {camelCaseToKebabCase, getObjectTypedEntries, wait} from '@augment-vir/common';
+import {getObjectTypedEntries, wait} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
 import {
     FullDatePart,
@@ -11,6 +11,7 @@ import {
 import {css, defineElementEvent, defineElementNoInputs, html, listen, nothing} from 'element-vir';
 import {LoaderAnimated24Icon, ViraButton, ViraInput} from 'vira';
 import {jobSearchRecordShape, type JobSearchRecord} from '../../data/job-search-record.js';
+import {makeKeyPretty} from '../../data/pretty-key.js';
 
 function createDefaultRecordEntry() {
     return {
@@ -60,7 +61,7 @@ export const JobEntry = defineElementNoInputs({
 
                 return html`
                     <tr>
-                        <th>${camelCaseToKebabCase(recordKey).replaceAll('-', ' ')}:</th>
+                        <th>${makeKeyPretty(recordKey)}:</th>
                         <td>
                             <${ViraInput.assign({
                                 value: recordValue,

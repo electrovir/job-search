@@ -1,0 +1,123 @@
+import {getObjectTypedEntries, getOrSet} from '@augment-vir/common';
+import {DateUnit, getEndDate, getStartDate, orderedMonthNames, toTimestamp} from 'date-vir';
+import {css, defineElement, html, listen} from 'element-vir';
+import {ViraButton} from 'vira';
+import {AppTab} from '../../data/app-tabs.js';
+import type {JobSearchRecord, JobSearchRecords} from '../../data/job-search-record.js';
+import type {JobAppRoute} from '../../data/router.js';
+import {ChangeRouteEvent} from '../event/change-route.event.js';
+import {JobViewRecord} from './job-view-record.element.js';
+
+export const JobView = defineElement<{
+    data: Readonly<JobSearchRecords>;
+    currentRoute: Readonly<JobAppRoute>;
+}>()({
+    tagName: 'job-view',
+    styles: css`
+        :host {
+            display: flex;
+            gap: 32px;
+        }
+
+        .week-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-start;
+        }
+
+        .all-weeks {
+            flex-shrink: 0;
+        }
+
+        .week-data {
+            word-break: break-all;
+        }
+    `,
+    render({inputs, dispatch}) {
+        const organizedData = organizeDataIntoWeeks(inputs.data);
+
+        const buttonTemplates = getObjectTypedEntries(organizedData).map(
+            ([
+                year,
+                weeks,
+            ]) => {
+                const buttons = Object.keys(weeks).map((weekKey) => {
+                    const yearWeekKey = `${year}${weekKey}`;
+                    return html`
+                        <${ViraButton.assign({
+                            text: weekKey.replace('-', ' - ').replaceAll(/(\D)(\d)/g, '$1 $2'),
+                            disabled: yearWeekKey === inputs.currentRoute.paths[1],
+                        })}
+                            ${listen('click', () => {
+                                dispatch(
+                                    new ChangeRouteEvent({
+                                        paths: [
+                                            AppTab.View,
+                                            yearWeekKey,
+                                        ],
+                                    }),
+                                );
+                            })}
+                        ></${ViraButton}>
+                    `;
+                });
+
+                return html`
+                    <section>
+                        <span>${year}</span>
+                        <div class="week-buttons">${buttons}</div>
+                    </section>
+                `;
+            },
+        );
+
+        const [
+            year,
+            weekKey,
+        ] = inputs.currentRoute.paths[1]
+            ? inputs.currentRoute.paths[1].replace(/(\d)(\D)/, '$1 $2').split(' ')
+            : [];
+
+        const selectedRecords = (year && weekKey && organizedData[Number(year)]?.[weekKey]) || [];
+
+        return html`
+            <div class="all-weeks">${buttonTemplates}</div>
+            <div class="week-data">
+                ${selectedRecords.map(
+                    (record) => html`
+                        <${JobViewRecord.assign({record})}></${JobViewRecord}>
+                    `,
+                )}
+            </div>
+        `;
+    },
+});
+
+type RecordWeeks = {[Year in number]: {[WeekKey in string]: JobSearchRecord[]}};
+
+function organizeDataIntoWeeks(data: Readonly<JobSearchRecords>): RecordWeeks {
+    const allWeeks: RecordWeeks = {};
+
+    const sorted = data.toSorted((a, b) => toTimestamp(b.contactDate) - toTimestamp(a.contactDate));
+
+    sorted.forEach((entry) => {
+        const startOfWeek = getStartDate(entry.contactDate, DateUnit.Week);
+        const endOfWeek = getEndDate(entry.contactDate, DateUnit.Week);
+
+        const yearWeeks = getOrSet(allWeeks, endOfWeek.year, () => {
+            return {};
+        });
+
+        const startOfWeekMonthName = orderedMonthNames[startOfWeek.month - 1]?.slice(0, 3);
+        const endOfWeekMonthName = orderedMonthNames[endOfWeek.month - 1]?.slice(0, 3);
+
+        const weekKey = `${startOfWeekMonthName}${startOfWeek.day}-${endOfWeekMonthName}${endOfWeek.day}`;
+
+        getOrSet(yearWeeks, weekKey, () => {
+            return [];
+        }).push(entry);
+    });
+
+    return allWeeks;
+}

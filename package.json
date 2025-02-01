@@ -34,7 +34,7 @@
         "@augment-vir/assert": "^31.9.1",
         "@augment-vir/common": "^31.9.1",
         "@augment-vir/web": "^31.9.1",
-        "date-vir": "^7.1.2",
+        "date-vir": "^7.2.0",
         "element-vir": "^23.1.1",
         "json5": "^2.2.3",
         "localforage-esm": "^1.10.2",

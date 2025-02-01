@@ -13,6 +13,7 @@ export const defaultJobAppRoute: JobAppRoute = {
 };
 
 export const jobAppRouter = new SpaRouter<JobAppPaths, undefined, undefined>({
+    basePath: 'job-search',
     sanitizeRoute(rawRoute) {
         const tab = checkWrap.isEnumValue(rawRoute.paths[0], AppTab) || defaultJobAppRoute.paths[0];
 

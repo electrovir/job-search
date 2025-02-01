@@ -1,16 +1,26 @@
-import {check} from '@augment-vir/assert';
-import {getEnumValues, wait} from '@augment-vir/common';
+import {check, checkWrap} from '@augment-vir/assert';
+import {extractErrorMessage, getEnumValues, wait} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
-import {asyncProp, css, defineElementNoInputs, html, isResolved, listen} from 'element-vir';
+import {
+    asyncProp,
+    css,
+    defineElementNoInputs,
+    html,
+    isAsyncError,
+    isResolved,
+    listen,
+} from 'element-vir';
+import {isValidShape} from 'object-shape-tester';
 import {ViraButton} from 'vira';
 import {AppTab, appTabDisplay} from '../../data/app-tabs.js';
 import {loadLocalData, saveDataLocally} from '../../data/data-store.js';
-import type {JobSearchRecords} from '../../data/job-search-record.js';
+import {jobSearchRecordsShape, type JobSearchRecords} from '../../data/job-search-record.js';
 import {defaultJobAppRoute, jobAppRouter} from '../../data/router.js';
 import {ChangeRouteEvent} from '../event/change-route.event.js';
 import {DataUpdateEvent} from '../event/data-update.event.js';
 import {JobEntry} from './job-entry.element.js';
 import {JobRawData} from './job-raw-data.element.js';
+import {JobView} from './job-view.element.js';
 
 export const JobApp = defineElementNoInputs({
     tagName: 'job-app',
@@ -41,6 +51,11 @@ export const JobApp = defineElementNoInputs({
         ${JobRawData} {
             flex-grow: 1;
         }
+
+        .error {
+            font-weight: bold;
+            color: red;
+        }
     `,
     stateInitStatic: {
         data: asyncProp({
@@ -62,22 +77,37 @@ export const JobApp = defineElementNoInputs({
             state.data.setValue(data);
         }
 
-        const currentTab = state.currentRoute.paths[0];
+        const currentData = state.data.value;
 
-        const tabTemplate = isResolved(state.data.value)
+        if (isAsyncError(currentData)) {
+            return html`
+                <p class="error">${extractErrorMessage(currentData)}</p>
+            `;
+        }
+
+        if (isResolved(currentData) && !isValidShape(currentData, jobSearchRecordsShape)) {
+            state.router.setRoute({
+                paths: [AppTab.Raw],
+            });
+            return;
+        }
+
+        const currentTab = String(state.currentRoute.paths[0]);
+
+        const tabTemplate = isResolved(currentData)
             ? currentTab === AppTab.Raw
                 ? html`
                       <${JobRawData.assign({
-                          data: state.data.value,
+                          data: currentData,
                       })}></${JobRawData}>
                   `
                 : currentTab === AppTab.Entry
                   ? html`
                         <${JobEntry}
                             ${listen(JobEntry.events.entrySave, async (event) => {
-                                if (check.isArray(state.data.value)) {
+                                if (check.isArray(currentData)) {
                                     const data: JobSearchRecords = [
-                                        ...state.data.value,
+                                        ...currentData,
                                         event.detail,
                                     ];
 
@@ -86,7 +116,14 @@ export const JobApp = defineElementNoInputs({
                             })}
                         ></${JobEntry}>
                     `
-                  : 'UNKNOWN TAB'
+                  : currentTab === AppTab.View
+                    ? html`
+                          <${JobView.assign({
+                              currentRoute: state.currentRoute,
+                              data: checkWrap.isArray(currentData) || [],
+                          })}></${JobView}>
+                      `
+                    : 'UNKNOWN TAB'
             : 'Loading...';
 
         const tabButtonTemplates = getEnumValues(AppTab).map((tab) => {

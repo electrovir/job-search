@@ -13,6 +13,7 @@ export const jobSearchRecordShape = defineShape({
     positionTitle: '',
     contactMethod: '',
     results: '',
+    notes: '',
 });
 
 export type JobSearchRecord = typeof jobSearchRecordShape.runtimeType;

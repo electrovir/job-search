@@ -17,8 +17,6 @@ export async function loadLocalData() {
         return [];
     }
 
-    assertValidShape(data, jobSearchRecordsShape);
-
     return data;
 }
 
