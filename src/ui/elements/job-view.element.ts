@@ -1,6 +1,6 @@
 import {getObjectTypedEntries, getOrSet} from '@augment-vir/common';
 import {DateUnit, getEndDate, getStartDate, orderedMonthNames, toTimestamp} from 'date-vir';
-import {css, defineElement, html, listen} from 'element-vir';
+import {css, defineElement, html, listen, nothing} from 'element-vir';
 import {ViraButton} from 'vira';
 import {AppTab} from '../../data/app-tabs.js';
 import type {JobSearchRecord, JobSearchRecords} from '../../data/job-search-record.js';
@@ -82,13 +82,19 @@ export const JobView = defineElement<{
         const selectedRecords = (year && weekKey && organizedData[Number(year)]?.[weekKey]) || [];
 
         return html`
-            <div class="all-weeks">${buttonTemplates}</div>
+            <div class="all-weeks">
+                ${buttonTemplates.length ? buttonTemplates : 'No records yet.'}
+            </div>
             <div class="week-data">
-                ${selectedRecords.map(
-                    (record) => html`
-                        <${JobViewRecord.assign({record})}></${JobViewRecord}>
-                    `,
-                )}
+                ${selectedRecords.length
+                    ? selectedRecords.map(
+                          (record) => html`
+                              <${JobViewRecord.assign({record})}></${JobViewRecord}>
+                          `,
+                      )
+                    : inputs.currentRoute.paths[1]
+                      ? 'No records for this week'
+                      : nothing}
             </div>
         `;
     },
