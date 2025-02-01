@@ -10,7 +10,7 @@ const jobSearchDataStore = localforage.createInstance({
 
 const dataKey = 'job-search-data';
 
-export async function loadData() {
+export async function loadLocalData() {
     const data = await jobSearchDataStore.getItem(dataKey);
 
     if (!data) {
@@ -22,7 +22,7 @@ export async function loadData() {
     return data;
 }
 
-export async function saveData(data: Readonly<JobSearchRecords>): Promise<void> {
+export async function saveDataLocally(data: Readonly<JobSearchRecords>): Promise<void> {
     assertValidShape(data, jobSearchRecordsShape);
 
     await jobSearchDataStore.setItem(dataKey, data);

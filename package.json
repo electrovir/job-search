@@ -36,6 +36,7 @@
         "@augment-vir/web": "^31.9.1",
         "date-vir": "^7.1.2",
         "element-vir": "^23.1.1",
+        "json5": "^2.2.3",
         "localforage-esm": "^1.10.2",
         "object-shape-tester": "^4.1.0",
         "spa-router-vir": "^4.0.5",

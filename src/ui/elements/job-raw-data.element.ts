@@ -1,9 +1,12 @@
-import {extractErrorMessage, wrapInTry} from '@augment-vir/common';
+import {extractErrorMessage, wait, wrapInTry} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
 import {css, defineElement, html, listen} from 'element-vir';
+import JSON5 from 'json5';
 import {assertValidShape} from 'object-shape-tester';
-import {ViraButton} from 'vira';
+import {LoaderAnimated24Icon, ViraButton} from 'vira';
+import {AppTab} from '../../data/app-tabs.js';
 import {jobSearchRecordsShape} from '../../data/job-search-record.js';
+import {ChangeRouteEvent} from '../event/change-route.event.js';
 import {DataUpdateEvent} from '../event/data-update.event.js';
 
 export const JobRawData = defineElement<{data: unknown}>()({
@@ -35,11 +38,12 @@ export const JobRawData = defineElement<{data: unknown}>()({
     `,
     stateInitStatic: {
         inputJson: '',
+        isSaving: false,
     },
     render({inputs, state, updateState, dispatch}) {
         const json = state.inputJson || JSON.stringify(inputs.data, null, 4);
 
-        const parsedJson = wrapInTry(() => JSON.parse(json), {
+        const parsedJson = wrapInTry(() => JSON5.parse(json), {
             fallbackValue: {},
         });
 
@@ -58,12 +62,21 @@ export const JobRawData = defineElement<{data: unknown}>()({
 
             <div class="bottom-buttons">
                 <${ViraButton.assign({
-                    text: 'Save',
-                    disabled: !!dataError,
+                    text: state.isSaving ? '' : 'Save',
+                    icon: state.isSaving ? LoaderAnimated24Icon : undefined,
+                    disabled: !!dataError || state.isSaving,
                 })}
-                    ${listen('click', () => {
+                    ${listen('click', async () => {
+                        updateState({isSaving: true});
                         assertValidShape(parsedJson, jobSearchRecordsShape);
+                        await wait({seconds: 0.5});
                         dispatch(new DataUpdateEvent(parsedJson));
+                        dispatch(
+                            new ChangeRouteEvent({
+                                paths: [AppTab.View],
+                            }),
+                        );
+                        updateState({isSaving: false});
                     })}
                 ></${ViraButton}>
                 <p class="error">

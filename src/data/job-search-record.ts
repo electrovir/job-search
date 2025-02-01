@@ -1,19 +1,17 @@
 import {fullDateShape} from 'date-vir';
-import {defineShape, literal, or} from 'object-shape-tester';
-
-export const nonEmptyStringShape = literal('', (value): value is string => !!value);
+import {defineShape} from 'object-shape-tester';
 
 export const jobSearchRecordShape = defineShape({
     contactDate: fullDateShape,
-    companyName: nonEmptyStringShape,
-    posting: or(undefined, nonEmptyStringShape),
-    companyAddress: nonEmptyStringShape,
-    contactPhoneNumber: or(undefined, nonEmptyStringShape),
-    contactEmail: or(undefined, nonEmptyStringShape),
-    url: or(undefined, nonEmptyStringShape),
-    contactName: or(undefined, nonEmptyStringShape),
-    positionTitle: nonEmptyStringShape,
-    contactMethod: nonEmptyStringShape,
+    companyName: '',
+    posting: '',
+    companyAddress: '',
+    contactPhoneNumber: '',
+    contactEmail: '',
+    url: '',
+    contactName: '',
+    positionTitle: '',
+    contactMethod: '',
     results: '',
 });
 

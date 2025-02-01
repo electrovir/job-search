@@ -1,9 +1,15 @@
+import {check} from '@augment-vir/assert';
 import {getEnumValues, wait} from '@augment-vir/common';
-import {asyncProp, css, defineElementNoInputs, html, isResolved} from 'element-vir';
+import {extractEventTarget} from '@augment-vir/web';
+import {asyncProp, css, defineElementNoInputs, html, isResolved, listen} from 'element-vir';
 import {ViraButton} from 'vira';
 import {AppTab, appTabDisplay} from '../../data/app-tabs.js';
-import {loadData} from '../../data/data-store.js';
+import {loadLocalData, saveDataLocally} from '../../data/data-store.js';
+import type {JobSearchRecords} from '../../data/job-search-record.js';
 import {defaultJobAppRoute, jobAppRouter} from '../../data/router.js';
+import {ChangeRouteEvent} from '../event/change-route.event.js';
+import {DataUpdateEvent} from '../event/data-update.event.js';
+import {JobEntry} from './job-entry.element.js';
 import {JobRawData} from './job-raw-data.element.js';
 
 export const JobApp = defineElementNoInputs({
@@ -17,14 +23,30 @@ export const JobApp = defineElementNoInputs({
             box-sizing: border-box;
             padding: 16px;
             font-family: sans-serif;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
             gap: 16px;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        ${JobRawData} {
+            flex-grow: 1;
         }
     `,
     stateInitStatic: {
         data: asyncProp({
             defaultValue: wait({
-                seconds: 2,
-            }).then(() => loadData()),
+                seconds: 0.5,
+            }).then(() => loadLocalData()),
         }),
         router: jobAppRouter,
         currentRoute: defaultJobAppRoute,
@@ -35,6 +57,11 @@ export const JobApp = defineElementNoInputs({
         });
     },
     render({state}) {
+        async function updateDate(data: JobSearchRecords) {
+            await saveDataLocally(data);
+            state.data.setValue(data);
+        }
+
         const currentTab = state.currentRoute.paths[0];
 
         const tabTemplate = isResolved(state.data.value)
@@ -43,9 +70,23 @@ export const JobApp = defineElementNoInputs({
                       <${JobRawData.assign({
                           data: state.data.value,
                       })}></${JobRawData}>
-                      Job App goes here!
                   `
-                : 'UNKNOWN TAB'
+                : currentTab === AppTab.Entry
+                  ? html`
+                        <${JobEntry}
+                            ${listen(JobEntry.events.entrySave, async (event) => {
+                                if (check.isArray(state.data.value)) {
+                                    const data: JobSearchRecords = [
+                                        ...state.data.value,
+                                        event.detail,
+                                    ];
+
+                                    await updateDate(data);
+                                }
+                            })}
+                        ></${JobEntry}>
+                    `
+                  : 'UNKNOWN TAB'
             : 'Loading...';
 
         const tabButtonTemplates = getEnumValues(AppTab).map((tab) => {
@@ -53,13 +94,32 @@ export const JobApp = defineElementNoInputs({
                 <${ViraButton.assign({
                     disabled: currentTab === tab,
                     text: appTabDisplay[tab],
-                })}></${ViraButton}>
+                })}
+                    ${listen('click', (event) => {
+                        const button = extractEventTarget(event, HTMLElement);
+                        button.dispatchEvent(
+                            new ChangeRouteEvent({
+                                paths: [tab],
+                            }),
+                        );
+                    })}
+                ></${ViraButton}>
             `;
         });
 
         return html`
-            <nav class="tab-buttons">${tabButtonTemplates}</nav>
-            <main>${tabTemplate}</main>
+            <div
+                class="app-wrapper"
+                ${listen(ChangeRouteEvent, (event) => {
+                    state.router.setRoute(event.detail);
+                })}
+                ${listen(DataUpdateEvent, async (event) => {
+                    await updateDate(event.detail);
+                })}
+            >
+                <nav class="tab-buttons">${tabButtonTemplates}</nav>
+                <main>${tabTemplate}</main>
+            </div>
         `;
     },
 });
