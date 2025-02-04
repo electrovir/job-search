@@ -109,17 +109,10 @@ export const JobApp = defineElementNoInputs({
             `;
         }
 
-        if (isResolved(currentData) && !isValidShape(currentData, jobSearchRecordsShape)) {
-            state.router.setRoute({
-                paths: [AppTab.Raw],
-            });
-            return;
-        }
-
         const currentTab = String(state.currentRoute.paths[0]);
 
         const tabTemplate = isResolved(currentData)
-            ? currentTab === AppTab.Raw
+            ? currentTab === AppTab.Raw || !isValidShape(currentData, jobSearchRecordsShape)
                 ? html`
                       <${JobRawData.assign({
                           data: currentData,
@@ -132,12 +125,12 @@ export const JobApp = defineElementNoInputs({
                                 JobCreateSearchRecord.events.searchRecordCreate,
                                 async (event) => {
                                     if (check.isArray(currentData)) {
-                                        const data: JobSearchRecords = [
+                                        const records: JobSearchRecords = [
                                             ...currentData,
                                             event.detail,
                                         ];
 
-                                        await updateDate(data);
+                                        await updateDate(records);
                                     }
                                 },
                             )}
