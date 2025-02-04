@@ -1542,9 +1542,9 @@ does not match RegExp
         .week-data {
             word-break: break-all;
         }
-    `,render({inputs:e,dispatch:t}){const n=ub(e.data),r=bd(),i=Uh(lr(r,{weeks:-1})),[s,o]=e.currentRoute.paths[1]?e.currentRoute.paths[1].replace(/(\d)(\D)/,"$1 $2").split(" "):[r.year,i],a=Sr(n).map(([l,c])=>{const f=Object.keys(c).map(m=>{const p=`${l}${m}`;return M`
-                        <${_t.assign({text:m.replace("-"," - ").replaceAll(/(\D)(\d)/g,"$1 $2"),disabled:!!l&&!!m&&p===`${s}${o}`})}
-                            ${se("click",()=>{t(new Ii({paths:[Ge.View,p]}))})}
+    `,render({inputs:e,dispatch:t}){const n=ub(e.data),r=bd(),i=Uh(lr(r,{weeks:-1})),[s,o]=e.currentRoute.paths[1]?e.currentRoute.paths[1].replace(/(\d)(\D)/,"$1 $2").split(" "):[r.year,i],a=Sr(n).map(([l,c])=>{const f=Object.keys(c).map(m=>{const p=`${m.replace("-"," - ").replaceAll(/(\D)(\d)/g,"$1 $2")} (${c[m]?.length||0})`,E=`${l}${m}`;return M`
+                        <${_t.assign({text:p,disabled:!!l&&!!m&&E===`${s}${o}`})}
+                            ${se("click",()=>{t(new Ii({paths:[Ge.View,E]}))})}
                         ></${_t}>
                     `});return M`
                     <section>
