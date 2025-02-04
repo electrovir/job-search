@@ -4,14 +4,13 @@ import {defineShape} from 'object-shape-tester';
 export const jobSearchRecordShape = defineShape({
     contactDate: fullDateShape,
     companyName: '',
-    posting: '',
     companyAddress: '',
-    contactPhoneNumber: '',
-    contactEmail: '',
-    url: '',
     contactName: '',
+    contactEmail: '',
+    contactPhoneNumber: '',
     positionTitle: '',
-
+    posting: '',
+    url: '',
     contactMethod: '',
     results: '',
     notes: '',
