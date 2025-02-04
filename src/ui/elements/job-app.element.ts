@@ -181,7 +181,7 @@ export const JobApp = defineElementNoInputs({
 
                     const updatedData = currentData.map((record) => {
                         if (record.id === event.detail.id) {
-                            return event.detail.record;
+                            return event.detail;
                         } else {
                             return record;
                         }

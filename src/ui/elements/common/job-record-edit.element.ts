@@ -8,8 +8,8 @@ import {
     toHtmlInputString,
     userTimezone,
 } from 'date-vir';
-import {css, defineElement, defineElementEvent, html, listen, nothing} from 'element-vir';
-import {LoaderAnimated24Icon, ViraButton, ViraInput} from 'vira';
+import {css, defineElement, defineElementEvent, html, listen, nothing, renderIf} from 'element-vir';
+import {LoaderAnimated24Icon, ViraButton, ViraButtonStyle, ViraInput} from 'vira';
 import {
     jobSearchRecordPropertyDisplayNames,
     jobSearchRecordShape,
@@ -64,12 +64,15 @@ export const JobSearchRecordEdit = defineElement<{
 
         assert.isDefined(currentSearchRecord);
 
-        const inputTemplates = getObjectTypedEntries(state.currentSearchRecord).map(
+        const inputTemplates = getObjectTypedEntries(currentSearchRecord).map(
             ([
                 recordKey,
                 recordValue,
             ]) => {
-                if (!check.isString(recordValue)) {
+                if (
+                    !check.isString(recordValue) ||
+                    !jobSearchRecordPropertyDisplayNames[recordKey]
+                ) {
                     return nothing;
                 }
 
@@ -94,6 +97,20 @@ export const JobSearchRecordEdit = defineElement<{
                 `;
             },
         );
+
+        const revertButton = html`
+            <${ViraButton.assign({
+                text: 'Revert',
+                disabled: state.isSaving,
+                buttonStyle: ViraButtonStyle.Outline,
+            })}
+                ${listen('click', () => {
+                    updateState({
+                        currentSearchRecord: inputs.existingRecord,
+                    });
+                })}
+            ></${ViraButton}>
+        `;
 
         return html`
             <table>
@@ -151,6 +168,7 @@ export const JobSearchRecordEdit = defineElement<{
                         });
                     })}
                 ></${ViraButton}>
+                ${renderIf(!!inputs.existingRecord, revertButton)}
                 <span class="saved-subtitle">${state.savedSubtitle}</span>
             </div>
         `;
