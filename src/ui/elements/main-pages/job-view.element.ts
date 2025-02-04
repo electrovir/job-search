@@ -11,11 +11,11 @@ import {
 } from 'date-vir';
 import {css, defineElement, html, listen, nothing} from 'element-vir';
 import {ViraButton} from 'vira';
-import {AppTab} from '../../data/app-tabs.js';
-import type {JobSearchRecord, JobSearchRecords} from '../../data/job-search-record.js';
-import type {JobAppRoute} from '../../data/router.js';
-import {ChangeRouteEvent} from '../event/change-route.event.js';
-import {JobViewRecord} from './job-view-record.element.js';
+import {AppTab} from '../../../data/app-tabs.js';
+import type {JobSearchRecord, JobSearchRecords} from '../../../data/job-search-record.js';
+import type {JobAppRoute} from '../../../data/router.js';
+import {ChangeRouteEvent} from '../../event/change-route.event.js';
+import {JobViewRecord} from '../common/job-view-record.element.js';
 
 export const JobView = defineElement<{
     data: Readonly<JobSearchRecords>;

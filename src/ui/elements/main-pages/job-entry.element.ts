@@ -14,7 +14,7 @@ import {
     jobSearchRecordPropertyDisplayNames,
     jobSearchRecordShape,
     type JobSearchRecord,
-} from '../../data/job-search-record.js';
+} from '../../../data/job-search-record.js';
 
 function createDefaultRecordEntry() {
     return {

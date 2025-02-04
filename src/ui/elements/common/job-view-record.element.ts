@@ -5,7 +5,7 @@ import {
     jobSearchRecordPropertyDisplayNames,
     jobSearchRecordShape,
     type JobSearchRecord,
-} from '../../data/job-search-record.js';
+} from '../../../data/job-search-record.js';
 
 export const JobViewRecord = defineElement<{
     record: Readonly<JobSearchRecord>;

@@ -19,9 +19,9 @@ import {defaultJobAppRoute, jobAppRouter} from '../../data/router.js';
 import {ChangeRouteEvent} from '../event/change-route.event.js';
 import {DataUpdateEvent} from '../event/data-update.event.js';
 import {GithubIcon} from '../icons/github.icon.js';
-import {JobEntry} from './job-entry.element.js';
-import {JobRawData} from './job-raw-data.element.js';
-import {JobView} from './job-view.element.js';
+import {JobEntry} from './main-pages/job-entry.element.js';
+import {JobRawData} from './main-pages/job-raw-data.element.js';
+import {JobView} from './main-pages/job-view.element.js';
 
 export const JobApp = defineElementNoInputs({
     tagName: 'job-app',

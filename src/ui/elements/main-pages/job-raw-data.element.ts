@@ -4,10 +4,10 @@ import {css, defineElement, html, listen} from 'element-vir';
 import JSON5 from 'json5';
 import {assertValidShape} from 'object-shape-tester';
 import {LoaderAnimated24Icon, ViraButton} from 'vira';
-import {AppTab} from '../../data/app-tabs.js';
-import {jobSearchRecordsShape} from '../../data/job-search-record.js';
-import {ChangeRouteEvent} from '../event/change-route.event.js';
-import {DataUpdateEvent} from '../event/data-update.event.js';
+import {AppTab} from '../../../data/app-tabs.js';
+import {jobSearchRecordsShape} from '../../../data/job-search-record.js';
+import {ChangeRouteEvent} from '../../event/change-route.event.js';
+import {DataUpdateEvent} from '../../event/data-update.event.js';
 
 export const JobRawData = defineElement<{data: unknown}>()({
     tagName: 'job-raw-data',
