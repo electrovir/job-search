@@ -1,5 +1,5 @@
 import {check, checkWrap} from '@augment-vir/assert';
-import {extractErrorMessage, getEnumValues, wait} from '@augment-vir/common';
+import {extractErrorMessage, getEnumValues} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
 import {
     asyncProp,
@@ -85,9 +85,7 @@ export const JobApp = defineElementNoInputs({
     `,
     stateInitStatic: {
         data: asyncProp({
-            defaultValue: wait({
-                seconds: 0.5,
-            }).then(() => loadLocalData()),
+            defaultValue: loadLocalData(),
         }),
         router: jobAppRouter,
         currentRoute: defaultJobAppRoute,
