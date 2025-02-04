@@ -10,8 +10,11 @@ import {
 } from 'date-vir';
 import {css, defineElementEvent, defineElementNoInputs, html, listen, nothing} from 'element-vir';
 import {LoaderAnimated24Icon, ViraButton, ViraInput} from 'vira';
-import {jobSearchRecordShape, type JobSearchRecord} from '../../data/job-search-record.js';
-import {makeKeyPretty} from '../../data/pretty-key.js';
+import {
+    jobSearchRecordPropertyDisplayNames,
+    jobSearchRecordShape,
+    type JobSearchRecord,
+} from '../../data/job-search-record.js';
 
 function createDefaultRecordEntry() {
     return {
@@ -61,7 +64,7 @@ export const JobEntry = defineElementNoInputs({
 
                 return html`
                     <tr>
-                        <th>${makeKeyPretty(recordKey)}:</th>
+                        <th>${jobSearchRecordPropertyDisplayNames[recordKey]}:</th>
                         <td>
                             <${ViraInput.assign({
                                 value: recordValue,

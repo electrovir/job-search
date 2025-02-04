@@ -3,7 +3,7 @@ import {getObjectTypedEntries} from '@augment-vir/common';
 import {toSimpleDatePartString} from 'date-vir';
 import {css, defineElement, html, nothing} from 'element-vir';
 import type {JobSearchRecord} from '../../data/job-search-record.js';
-import {makeKeyPretty} from '../../data/pretty-key.js';
+import {jobSearchRecordPropertyDisplayNames} from '../../data/job-search-record.js';
 
 export const JobViewRecord = defineElement<{
     record: Readonly<JobSearchRecord>;
@@ -27,17 +27,17 @@ export const JobViewRecord = defineElement<{
             .sort(([a], [b]) => a.localeCompare(b))
             .map(
                 ([
-                    key,
-                    value,
+                    recordKey,
+                    recordValue,
                 ]) => {
-                    if (!value || !check.isString(value)) {
+                    if (!recordValue || !check.isString(recordValue)) {
                         return nothing;
                     }
 
                     return html`
                         <tr>
-                            <th>${makeKeyPretty(key)}:</th>
-                            <td>${value}</td>
+                            <th>${jobSearchRecordPropertyDisplayNames[recordKey]}:</th>
+                            <td>${recordValue}</td>
                         </tr>
                     `;
                 },
@@ -48,7 +48,7 @@ export const JobViewRecord = defineElement<{
             <table>
                 <tbody>
                     <tr>
-                        <th>contact date:</th>
+                        <th>${jobSearchRecordPropertyDisplayNames.contactDate}:</th>
                         <td>${dateString}</td>
                     </tr>
                     ${tableRows}
