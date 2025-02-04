@@ -6,8 +6,8 @@ import {assertValidShape} from 'object-shape-tester';
 import {LoaderAnimated24Icon, ViraButton} from 'vira';
 import {AppTab} from '../../../data/app-tabs.js';
 import {jobSearchRecordsShape} from '../../../data/job-search-record.js';
-import {ChangeRouteEvent} from '../../event/change-route.event.js';
-import {DataUpdateEvent} from '../../event/data-update.event.js';
+import {ChangeRouteEvent} from '../../events/change-route.event.js';
+import {UpdateAllRecordsEvent} from '../../events/records-update.event.js';
 
 export const JobRawData = defineElement<{data: unknown}>()({
     tagName: 'job-raw-data',
@@ -70,7 +70,7 @@ export const JobRawData = defineElement<{data: unknown}>()({
                         updateState({isSaving: true});
                         assertValidShape(parsedJson, jobSearchRecordsShape);
                         await wait({seconds: 0.5});
-                        dispatch(new DataUpdateEvent(parsedJson));
+                        dispatch(new UpdateAllRecordsEvent(parsedJson));
                         dispatch(
                             new ChangeRouteEvent({
                                 paths: [AppTab.View],

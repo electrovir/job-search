@@ -14,7 +14,7 @@ import {ViraButton} from 'vira';
 import {AppTab} from '../../../data/app-tabs.js';
 import type {JobSearchRecord, JobSearchRecords} from '../../../data/job-search-record.js';
 import type {JobAppRoute} from '../../../data/router.js';
-import {ChangeRouteEvent} from '../../event/change-route.event.js';
+import {ChangeRouteEvent} from '../../events/change-route.event.js';
 import {JobViewRecord} from '../common/job-view-record.element.js';
 
 export const JobViewAllRecords = defineElement<{

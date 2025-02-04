@@ -10,14 +10,17 @@ import {
     isResolved,
     listen,
 } from 'element-vir';
-import {isValidShape} from 'object-shape-tester';
+import {assertValidShape, isValidShape} from 'object-shape-tester';
 import {ViraButton, ViraIcon, ViraLink} from 'vira';
 import {AppTab, appTabDisplay} from '../../data/app-tabs.js';
 import {loadLocalData, saveDataLocally} from '../../data/data-store.js';
 import {jobSearchRecordsShape, type JobSearchRecords} from '../../data/job-search-record.js';
 import {defaultJobAppRoute, jobAppRouter} from '../../data/router.js';
-import {ChangeRouteEvent} from '../event/change-route.event.js';
-import {DataUpdateEvent} from '../event/data-update.event.js';
+import {ChangeRouteEvent} from '../events/change-route.event.js';
+import {
+    UpdateAllRecordsEvent,
+    UpdateIndividualRecordEvent,
+} from '../events/records-update.event.js';
 import {GithubIcon} from '../icons/github.icon.js';
 import {JobCreateSearchRecord} from './main-pages/job-create-search-record.element.js';
 import {JobRawData} from './main-pages/job-raw-data.element.js';
@@ -170,8 +173,21 @@ export const JobApp = defineElementNoInputs({
                 ${listen(ChangeRouteEvent, (event) => {
                     state.router.setRoute(event.detail);
                 })}
-                ${listen(DataUpdateEvent, async (event) => {
+                ${listen(UpdateAllRecordsEvent, async (event) => {
                     await updateDate(event.detail);
+                })}
+                ${listen(UpdateIndividualRecordEvent, async (event) => {
+                    assertValidShape(currentData, jobSearchRecordsShape);
+
+                    const updatedData = currentData.map((record) => {
+                        if (record.id === event.detail.id) {
+                            return event.detail.record;
+                        } else {
+                            return record;
+                        }
+                    });
+
+                    await updateDate(updatedData);
                 })}
             >
                 <nav>
