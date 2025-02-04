@@ -25,12 +25,10 @@ export const JobViewRecord = defineElement<{
 
         const entryTitle = inputs.record.contactName || inputs.record.companyName || dateString;
 
-        const jobRecordKeyOrder: (keyof JobSearchRecord)[] = getObjectTypedKeys(
-            jobSearchRecordShape.shape,
-        );
+        const jobRecordKeyOrder = getObjectTypedKeys(jobSearchRecordShape.shape);
 
         const tableRows = jobRecordKeyOrder.map((recordKey) => {
-            if (recordKey === 'contactDate') return nothing;
+            if (recordKey === 'contactDate' || !inputs.record[recordKey]) return nothing;
 
             return html`
                 <tr>
