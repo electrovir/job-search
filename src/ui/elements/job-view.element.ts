@@ -64,12 +64,17 @@ export const JobView = defineElement<{
                 buttonWeeks,
             ]) => {
                 const buttons = Object.keys(buttonWeeks).map((buttonWeekKey) => {
+                    const buttonText = `${buttonWeekKey
+                        .replace('-', ' - ')
+                        .replaceAll(
+                            /(\D)(\d)/g,
+                            '$1 $2',
+                        )} (${buttonWeeks[buttonWeekKey]?.length || 0})`;
+
                     const buttonYearWeekKey = `${buttonYear}${buttonWeekKey}`;
                     return html`
                         <${ViraButton.assign({
-                            text: buttonWeekKey
-                                .replace('-', ' - ')
-                                .replaceAll(/(\D)(\d)/g, '$1 $2'),
+                            text: buttonText,
                             disabled:
                                 !!buttonYear &&
                                 !!buttonWeekKey &&
