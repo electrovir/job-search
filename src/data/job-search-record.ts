@@ -2,6 +2,7 @@ import {fullDateShape} from 'date-vir';
 import {defineShape} from 'object-shape-tester';
 
 export const jobSearchRecordShape = defineShape({
+    id: '',
     contactDate: fullDateShape,
     companyName: '',
     companyAddress: '',
@@ -22,8 +23,11 @@ export const jobSearchRecordsShape = defineShape([jobSearchRecordShape]);
 
 export type JobSearchRecords = typeof jobSearchRecordsShape.runtimeType;
 
-/** These are the names for each property that will be displayed to the user. */
-export const jobSearchRecordPropertyDisplayNames: Record<keyof JobSearchRecord, string> = {
+/**
+ * These are the names for each property that will be displayed to the user. Any omitted properties
+ * will not be displayed to the user.
+ */
+export const jobSearchRecordPropertyDisplayNames: Partial<Record<keyof JobSearchRecord, string>> = {
     companyAddress: 'Company Address',
     companyName: 'Company Name',
     contactDate: 'Date Made Contact',
