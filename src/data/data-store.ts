@@ -1,4 +1,5 @@
-import {log, type AnyObject} from '@augment-vir/common';
+import {log, randomString, type AnyObject} from '@augment-vir/common';
+import {getNowInUserTimezone, toSimpleDatePartString} from 'date-vir';
 import localforage from 'localforage-esm';
 import {assertValidShape} from 'object-shape-tester';
 import {dataMigrations} from './data-migrations.js';
@@ -42,6 +43,13 @@ async function migrateData(): Promise<void> {
     log.info(`Migration found for data version '${currentVersion}'. Executing migration...`);
 
     const currentData = (await jobSearchRecordsStore.getItem<AnyObject[]>(dataKey)) || [];
+    const backupKey = [
+        'backup-from',
+        currentVersion,
+        toSimpleDatePartString(getNowInUserTimezone()),
+        randomString(4),
+    ].join('-');
+    await jobSearchRecordsStore.setItem(backupKey, currentData);
 
     const {fixedRecords, nextVersion} = await migrator(currentData);
 

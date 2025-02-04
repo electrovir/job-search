@@ -7,10 +7,14 @@ export type DataMigrator = (
 export const dataMigrations: Record<number | string, DataMigrator> = {
     ''(this: void, records: AnyObject[]) {
         const fixedRecords = records.map((record) => {
-            return {
-                ...record,
-                id: createUuidV4(),
-            };
+            if ('id' in record) {
+                return record;
+            } else {
+                return {
+                    ...record,
+                    id: createUuidV4(),
+                };
+            }
         });
 
         return {
