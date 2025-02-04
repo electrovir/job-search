@@ -1,2 +1,2 @@
-- add a "Download" button on the raw screen
-- better separate fields when viewing and editing them (a space between company fields and contact fields, for example)
+-   add a "Download" button on the raw screen
+-   better separate fields when viewing and editing them (a space between company fields and contact fields, for example)
