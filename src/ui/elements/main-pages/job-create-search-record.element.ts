@@ -16,15 +16,15 @@ import {
     type JobSearchRecord,
 } from '../../../data/job-search-record.js';
 
-function createDefaultRecordEntry() {
+function createDefaultSearchRecord() {
     return {
         ...jobSearchRecordShape.defaultValue,
         contactDate: getNowInUserTimezone(),
     };
 }
 
-export const JobEntry = defineElementNoInputs({
-    tagName: 'job-entry',
+export const JobCreateSearchRecord = defineElementNoInputs({
+    tagName: 'job-create-search-record',
     styles: css`
         th {
             text-align: right;
@@ -45,12 +45,12 @@ export const JobEntry = defineElementNoInputs({
         }
     `,
     events: {
-        entrySave: defineElementEvent<JobSearchRecord>(),
+        searchRecordCreate: defineElementEvent<JobSearchRecord>(),
     },
     stateInitStatic: {
         isSaving: false,
         savedSubtitle: '',
-        currentJobRecord: createDefaultRecordEntry(),
+        currentJobRecord: createDefaultSearchRecord(),
     },
     render({state, updateState, dispatch, events}) {
         const inputTemplates = getObjectTypedEntries(state.currentJobRecord).map(
@@ -128,10 +128,10 @@ export const JobEntry = defineElementNoInputs({
                         updateState({
                             isSaving: true,
                         });
-                        dispatch(new events.entrySave(state.currentJobRecord));
+                        dispatch(new events.searchRecordCreate(state.currentJobRecord));
                         await wait({milliseconds: 500});
                         updateState({
-                            currentJobRecord: createDefaultRecordEntry(),
+                            currentJobRecord: createDefaultSearchRecord(),
                             savedSubtitle: 'Saved',
                             isSaving: false,
                         });

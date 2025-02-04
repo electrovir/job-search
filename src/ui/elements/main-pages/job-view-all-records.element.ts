@@ -17,11 +17,11 @@ import type {JobAppRoute} from '../../../data/router.js';
 import {ChangeRouteEvent} from '../../event/change-route.event.js';
 import {JobViewRecord} from '../common/job-view-record.element.js';
 
-export const JobView = defineElement<{
+export const JobViewAllRecords = defineElement<{
     data: Readonly<JobSearchRecords>;
     currentRoute: Readonly<JobAppRoute>;
 }>()({
-    tagName: 'job-view',
+    tagName: 'job-view-all-records',
     styles: css`
         :host {
             display: flex;
@@ -145,18 +145,18 @@ function organizeDataIntoWeeks(data: Readonly<JobSearchRecords>): RecordWeeks {
 
     const sorted = data.toSorted((a, b) => toTimestamp(b.contactDate) - toTimestamp(a.contactDate));
 
-    sorted.forEach((entry) => {
-        const endOfWeek = getEndDate(entry.contactDate, DateUnit.Week);
+    sorted.forEach((searchRecord) => {
+        const endOfWeek = getEndDate(searchRecord.contactDate, DateUnit.Week);
 
         const yearWeeks = getOrSet(allWeeks, endOfWeek.year, () => {
             return {};
         });
 
-        const weekKey = generateWeekKey(entry.contactDate);
+        const weekKey = generateWeekKey(searchRecord.contactDate);
 
         getOrSet(yearWeeks, weekKey, () => {
             return [];
-        }).push(entry);
+        }).push(searchRecord);
     });
 
     return allWeeks;

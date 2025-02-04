@@ -23,7 +23,7 @@ export const JobViewRecord = defineElement<{
     render({inputs}) {
         const dateString = toSimpleDatePartString(inputs.record.contactDate);
 
-        const entryTitle = inputs.record.contactName || inputs.record.companyName || dateString;
+        const recordTitle = inputs.record.contactName || inputs.record.companyName || dateString;
 
         const jobRecordKeyOrder = getObjectTypedKeys(jobSearchRecordShape.shape);
 
@@ -41,7 +41,7 @@ export const JobViewRecord = defineElement<{
         });
 
         return html`
-            <h2>${entryTitle}</h2>
+            <h2>${recordTitle}</h2>
             <table>
                 <tbody>
                     <tr>

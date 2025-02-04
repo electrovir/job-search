@@ -19,9 +19,9 @@ import {defaultJobAppRoute, jobAppRouter} from '../../data/router.js';
 import {ChangeRouteEvent} from '../event/change-route.event.js';
 import {DataUpdateEvent} from '../event/data-update.event.js';
 import {GithubIcon} from '../icons/github.icon.js';
-import {JobEntry} from './main-pages/job-entry.element.js';
+import {JobCreateSearchRecord} from './main-pages/job-create-search-record.element.js';
 import {JobRawData} from './main-pages/job-raw-data.element.js';
-import {JobView} from './main-pages/job-view.element.js';
+import {JobViewAllRecords} from './main-pages/job-view-all-records.element.js';
 
 export const JobApp = defineElementNoInputs({
     tagName: 'job-app',
@@ -129,25 +129,28 @@ export const JobApp = defineElementNoInputs({
                   `
                 : currentTab === AppTab.Entry
                   ? html`
-                        <${JobEntry}
-                            ${listen(JobEntry.events.entrySave, async (event) => {
-                                if (check.isArray(currentData)) {
-                                    const data: JobSearchRecords = [
-                                        ...currentData,
-                                        event.detail,
-                                    ];
+                        <${JobCreateSearchRecord}
+                            ${listen(
+                                JobCreateSearchRecord.events.searchRecordCreate,
+                                async (event) => {
+                                    if (check.isArray(currentData)) {
+                                        const data: JobSearchRecords = [
+                                            ...currentData,
+                                            event.detail,
+                                        ];
 
-                                    await updateDate(data);
-                                }
-                            })}
-                        ></${JobEntry}>
+                                        await updateDate(data);
+                                    }
+                                },
+                            )}
+                        ></${JobCreateSearchRecord}>
                     `
                   : currentTab === AppTab.View
                     ? html`
-                          <${JobView.assign({
+                          <${JobViewAllRecords.assign({
                               currentRoute: state.currentRoute,
                               data: checkWrap.isArray(currentData) || [],
-                          })}></${JobView}>
+                          })}></${JobViewAllRecords}>
                       `
                     : 'UNKNOWN TAB'
             : 'Loading...';

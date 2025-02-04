@@ -5,7 +5,7 @@ export enum AppTab {
 }
 
 export const appTabDisplay: Record<AppTab, string> = {
-    [AppTab.Entry]: 'Entry',
+    [AppTab.Entry]: 'New',
     [AppTab.Raw]: 'Raw',
-    [AppTab.View]: 'View',
+    [AppTab.View]: 'View All',
 };

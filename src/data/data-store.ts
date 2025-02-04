@@ -3,7 +3,7 @@ import {assertValidShape} from 'object-shape-tester';
 import {JobSearchRecords, jobSearchRecordsShape} from './job-search-record.js';
 
 const jobSearchDataStore = localforage.createInstance({
-    description: 'Entry records for job search.',
+    description: 'Records for job search.',
     name: 'job-search',
     storeName: 'job-search',
 });
