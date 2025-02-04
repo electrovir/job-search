@@ -153,6 +153,19 @@ export const JobSearchRecordEdit = defineElement<{
             </table>
             <div class="buttons">
                 <${ViraButton.assign({
+                    text: inputs.existingRecord ? 'Revert' : 'Clear',
+                    disabled: state.isSaving,
+                    buttonStyle: ViraButtonStyle.Outline,
+                })}
+                    ${listen('click', () => {
+                        allowNavigation(recordEditsNavKey);
+                        localStorage.removeItem(recordEditsNavKey);
+                        updateState({
+                            currentSearchRecord: undefined,
+                        });
+                    })}
+                ></${ViraButton}>
+                <${ViraButton.assign({
                     text: state.isSaving ? '' : 'Save',
                     icon: state.isSaving ? LoaderAnimated24Icon : undefined,
                     disabled: state.isSaving,
@@ -174,20 +187,6 @@ export const JobSearchRecordEdit = defineElement<{
                         await wait({seconds: 5});
                         updateState({
                             savedSubtitle: '',
-                        });
-                    })}
-                ></${ViraButton}>
-
-                <${ViraButton.assign({
-                    text: inputs.existingRecord ? 'Revert' : 'Clear',
-                    disabled: state.isSaving,
-                    buttonStyle: ViraButtonStyle.Outline,
-                })}
-                    ${listen('click', () => {
-                        allowNavigation(recordEditsNavKey);
-                        localStorage.removeItem(recordEditsNavKey);
-                        updateState({
-                            currentSearchRecord: undefined,
                         });
                     })}
                 ></${ViraButton}>
