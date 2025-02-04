@@ -78,7 +78,7 @@
         "prettier-plugin-toml": "^2.0.1",
         "typescript": "^5.7.3",
         "typescript-eslint": "^8.23.0",
-        "virmator": "^13.12.0",
+        "virmator": "^13.13.0",
         "vite": "^6.0.11"
     },
     "engines": {

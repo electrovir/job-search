@@ -28,7 +28,9 @@ export const JobViewRecord = defineElement<{
         const jobRecordKeyOrder = getObjectTypedKeys(jobSearchRecordShape.shape);
 
         const tableRows = jobRecordKeyOrder.map((recordKey) => {
-            if (recordKey === 'contactDate' || !inputs.record[recordKey]) return nothing;
+            if (recordKey === 'contactDate' || !inputs.record[recordKey]) {
+                return nothing;
+            }
 
             return html`
                 <tr>
