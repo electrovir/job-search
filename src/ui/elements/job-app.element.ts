@@ -11,13 +11,14 @@ import {
     listen,
 } from 'element-vir';
 import {isValidShape} from 'object-shape-tester';
-import {ViraButton} from 'vira';
+import {ViraButton, ViraIcon, ViraLink} from 'vira';
 import {AppTab, appTabDisplay} from '../../data/app-tabs.js';
 import {loadLocalData, saveDataLocally} from '../../data/data-store.js';
 import {jobSearchRecordsShape, type JobSearchRecords} from '../../data/job-search-record.js';
 import {defaultJobAppRoute, jobAppRouter} from '../../data/router.js';
 import {ChangeRouteEvent} from '../event/change-route.event.js';
 import {DataUpdateEvent} from '../event/data-update.event.js';
+import {GithubIcon} from '../icons/github.icon.js';
 import {JobEntry} from './job-entry.element.js';
 import {JobRawData} from './job-raw-data.element.js';
 import {JobView} from './job-view.element.js';
@@ -40,6 +41,31 @@ export const JobApp = defineElementNoInputs({
             flex-direction: column;
             flex-grow: 1;
             gap: 16px;
+        }
+
+        ${ViraLink} {
+            display: flex;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-icon {
+            height: 24px;
+            width: 24px;
+        }
+
+        .tab-buttons,
+        .external-links {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .external-links {
+            align-items: center;
         }
 
         main {
@@ -154,7 +180,19 @@ export const JobApp = defineElementNoInputs({
                     await updateDate(event.detail);
                 })}
             >
-                <nav class="tab-buttons">${tabButtonTemplates}</nav>
+                <nav>
+                    <div class="tab-buttons">${tabButtonTemplates}</div>
+                    <div class="external-links">
+                        <${ViraLink.assign({
+                            link: {
+                                newTab: true,
+                                url: 'https://github.com/electrovir/job-search',
+                            },
+                        })}>
+                            <${ViraIcon.assign({icon: GithubIcon})} class="nav-icon"></${ViraIcon}>
+                        </${ViraLink}>
+                    </div>
+                </nav>
                 <main>${tabTemplate}</main>
             </div>
         `;
