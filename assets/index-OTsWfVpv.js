@@ -1470,12 +1470,11 @@ does not match RegExp
                 </tbody>
             </table>
             <div class="buttons">
-                <${et.assign({text:e.isSaving?"":"Save",icon:e.isSaving?va:void 0,disabled:e.isSaving})}
-                    ${H("click",async()=>{t({isSaving:!0}),n(new r.searchRecordSave(s)),await Qt({seconds:.5}),t({currentSearchRecord:El(),savedSubtitle:"Saved",isSaving:!1}),localStorage.removeItem(qt),Dl(qt),await Qt({seconds:5}),t({savedSubtitle:""})})}
-                ></${et}>
-
                 <${et.assign({text:i.existingRecord?"Revert":"Clear",disabled:e.isSaving,buttonStyle:Ni.Outline})}
                     ${H("click",()=>{Dl(qt),localStorage.removeItem(qt),t({currentSearchRecord:void 0})})}
+                ></${et}>
+                <${et.assign({text:e.isSaving?"":"Save",icon:e.isSaving?va:void 0,disabled:e.isSaving})}
+                    ${H("click",async()=>{t({isSaving:!0}),n(new r.searchRecordSave(s)),await Qt({seconds:.5}),t({currentSearchRecord:El(),savedSubtitle:"Saved",isSaving:!1}),localStorage.removeItem(qt),Dl(qt),await Qt({seconds:5}),t({savedSubtitle:""})})}
                 ></${et}>
                 <span class="saved-subtitle">${e.savedSubtitle}</span>
             </div>
