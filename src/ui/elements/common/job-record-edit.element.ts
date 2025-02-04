@@ -1,5 +1,5 @@
 import {assert, check} from '@augment-vir/assert';
-import {getObjectTypedEntries, wait} from '@augment-vir/common';
+import {getObjectTypedEntries, wait, wrapInTry, type AnyObject} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
 import {
     FullDatePart,
@@ -8,7 +8,9 @@ import {
     toHtmlInputString,
     userTimezone,
 } from 'date-vir';
-import {css, defineElement, defineElementEvent, html, listen, nothing, renderIf} from 'element-vir';
+import {css, defineElement, defineElementEvent, html, listen, nothing} from 'element-vir';
+import {isValidShape} from 'object-shape-tester';
+import {allowNavigation, preventNavigation} from 'prevent-navigation';
 import {LoaderAnimated24Icon, ViraButton, ViraButtonStyle, ViraInput} from 'vira';
 import {
     jobSearchRecordPropertyDisplayNames,
@@ -22,6 +24,8 @@ function createDefaultRecordEntry() {
         contactDate: getNowInUserTimezone(),
     };
 }
+
+const recordEditsNavKey = 'record edits';
 
 export const JobSearchRecordEdit = defineElement<{
     existingRecord: Readonly<JobSearchRecord> | undefined;
@@ -56,13 +60,40 @@ export const JobSearchRecordEdit = defineElement<{
     },
     render({state, updateState, dispatch, events, inputs}) {
         if (!state.currentSearchRecord) {
+            const cachedEntry: AnyObject | undefined = wrapInTry(
+                () => JSON.parse(localStorage.getItem(recordEditsNavKey) || ''),
+                {
+                    fallbackValue: undefined,
+                },
+            );
+
             updateState({
-                currentSearchRecord: inputs.existingRecord || createDefaultRecordEntry(),
+                currentSearchRecord:
+                    inputs.existingRecord ||
+                    (isValidShape(cachedEntry, jobSearchRecordShape)
+                        ? cachedEntry
+                        : createDefaultRecordEntry()),
             });
         }
         const currentSearchRecord = state.currentSearchRecord;
-
         assert.isDefined(currentSearchRecord);
+
+        function makeEdit<const Key extends keyof JobSearchRecord>(
+            key: Key,
+            value: JobSearchRecord[Key],
+        ) {
+            assert.isDefined(currentSearchRecord);
+            preventNavigation(recordEditsNavKey);
+            const newRecord = {
+                ...currentSearchRecord,
+                [key]: value,
+            };
+
+            localStorage.setItem(recordEditsNavKey, JSON.stringify(newRecord));
+            updateState({
+                currentSearchRecord: newRecord,
+            });
+        }
 
         const inputTemplates = getObjectTypedEntries(currentSearchRecord).map(
             ([
@@ -84,12 +115,7 @@ export const JobSearchRecordEdit = defineElement<{
                                 value: recordValue,
                             })}
                                 ${listen(ViraInput.events.valueChange, (event) => {
-                                    updateState({
-                                        currentSearchRecord: {
-                                            ...currentSearchRecord,
-                                            [recordKey]: event.detail,
-                                        },
-                                    });
+                                    makeEdit(recordKey, event.detail);
                                 })}
                             ></${ViraInput}>
                         </td>
@@ -97,20 +123,6 @@ export const JobSearchRecordEdit = defineElement<{
                 `;
             },
         );
-
-        const revertButton = html`
-            <${ViraButton.assign({
-                text: 'Revert',
-                disabled: state.isSaving,
-                buttonStyle: ViraButtonStyle.Outline,
-            })}
-                ${listen('click', () => {
-                    updateState({
-                        currentSearchRecord: inputs.existingRecord,
-                    });
-                })}
-            ></${ViraButton}>
-        `;
 
         return html`
             <table>
@@ -130,12 +142,7 @@ export const JobSearchRecordEdit = defineElement<{
                                         userTimezone,
                                     );
                                     if (value) {
-                                        updateState({
-                                            currentSearchRecord: {
-                                                ...currentSearchRecord,
-                                                contactDate: value,
-                                            },
-                                        });
+                                        makeEdit('contactDate', value);
                                     }
                                 })}
                             />
@@ -161,6 +168,8 @@ export const JobSearchRecordEdit = defineElement<{
                             savedSubtitle: 'Saved',
                             isSaving: false,
                         });
+                        localStorage.removeItem(recordEditsNavKey);
+                        allowNavigation(recordEditsNavKey);
 
                         await wait({seconds: 5});
                         updateState({
@@ -168,7 +177,20 @@ export const JobSearchRecordEdit = defineElement<{
                         });
                     })}
                 ></${ViraButton}>
-                ${renderIf(!!inputs.existingRecord, revertButton)}
+
+                <${ViraButton.assign({
+                    text: inputs.existingRecord ? 'Revert' : 'Clear',
+                    disabled: state.isSaving,
+                    buttonStyle: ViraButtonStyle.Outline,
+                })}
+                    ${listen('click', () => {
+                        allowNavigation(recordEditsNavKey);
+                        localStorage.removeItem(recordEditsNavKey);
+                        updateState({
+                            currentSearchRecord: undefined,
+                        });
+                    })}
+                ></${ViraButton}>
                 <span class="saved-subtitle">${state.savedSubtitle}</span>
             </div>
         `;
