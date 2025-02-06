@@ -10,7 +10,7 @@ import {
     type FullDate,
 } from 'date-vir';
 import {css, defineElement, html, listen, nothing} from 'element-vir';
-import {ViraButton} from 'vira';
+import {ViraButton, ViraInput} from 'vira';
 import {AppTab} from '../../../data/app-tabs.js';
 import type {JobSearchRecord, JobSearchRecords} from '../../../data/job-search-record.js';
 import type {JobAppRoute} from '../../../data/router.js';
@@ -43,7 +43,10 @@ export const JobViewAllRecords = defineElement<{
             word-break: break-all;
         }
     `,
-    render({inputs, dispatch}) {
+    stateInitStatic: {
+        searchValue: '',
+    },
+    render({state, updateState, inputs, dispatch}) {
         const organizedData = organizeDataIntoWeeks(inputs.data);
         const now = getNowInUserTimezone();
 
@@ -114,6 +117,17 @@ export const JobViewAllRecords = defineElement<{
                 ${buttonTemplates.length ? buttonTemplates : 'No records yet.'}
             </div>
             <div class="week-data">
+                Search
+                <${ViraInput.assign({
+                    value: state.searchValue,
+                    showClearButton: true,
+                })}
+                    ${listen(ViraInput.events.valueChange, (event) => {
+                        updateState({
+                            searchValue: event.detail,
+                        });
+                    })}
+                ></${ViraInput}>
                 ${selectedRecords.length
                     ? selectedRecords.map(
                           (record) => html`
