@@ -3,8 +3,9 @@ import {extractEventTarget} from '@augment-vir/web';
 import {css, defineElement, html, listen} from 'element-vir';
 import JSON5 from 'json5';
 import {assertValidShape} from 'object-shape-tester';
-import {LoaderAnimated24Icon, ViraButton} from 'vira';
+import {LoaderAnimated24Icon, ViraButton, ViraButtonStyle} from 'vira';
 import {AppTab} from '../../../data/app-tabs.js';
+import {downloadJson} from '../../../data/download-json.js';
 import {jobSearchRecordsShape} from '../../../data/job-search-record.js';
 import {ChangeRouteEvent} from '../../events/change-route.event.js';
 import {UpdateAllRecordsEvent} from '../../events/records-update.event.js';
@@ -61,6 +62,14 @@ export const JobRawData = defineElement<{data: unknown}>()({
             ></textarea>
 
             <div class="bottom-buttons">
+                <${ViraButton.assign({
+                    text: 'Download',
+                    buttonStyle: ViraButtonStyle.Outline,
+                })}
+                    ${listen('click', () => {
+                        downloadJson(json);
+                    })}
+                ></${ViraButton}>
                 <${ViraButton.assign({
                     text: state.isSaving ? '' : 'Save',
                     icon: state.isSaving ? LoaderAnimated24Icon : undefined,
