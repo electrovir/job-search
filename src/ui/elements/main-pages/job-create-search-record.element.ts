@@ -7,7 +7,10 @@ import {JobRecordSearch} from '../common/job-record-search.element.js';
 
 export const JobCreateSearchRecord = defineElement<{allRecords: Readonly<JobSearchRecords>}>()({
     tagName: 'job-create-search-record',
-    styles: css`
+    hostClasses: {
+        'job-create-search-record-no-past-entries': ({state}) => !state.searchResultCount,
+    },
+    styles: ({hostClasses}) => css`
         :host {
             display: flex;
             flex-wrap: wrap;
@@ -58,6 +61,10 @@ export const JobCreateSearchRecord = defineElement<{allRecords: Readonly<JobSear
             margin-left: 16px;
             opacity: 0.5;
         }
+
+        ${hostClasses['job-create-search-record-no-past-entries'].selector} .search-results {
+            display: none;
+        }
     `,
     events: {
         searchRecordCreate: defineElementEvent<JobSearchRecord>(),
@@ -75,6 +82,10 @@ export const JobCreateSearchRecord = defineElement<{allRecords: Readonly<JobSear
                   checkWrap.isLengthAtLeast(state.currentEdits.posting, 3),
               ].filter(check.isTruthy)
             : [];
+
+        if (!searchQuery.length) {
+            updateState({searchResultCount: 0});
+        }
 
         const warningMessage = state.searchResultCount
             ? 'Warning: you may have already entered this job.'

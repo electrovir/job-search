@@ -1,7 +1,7 @@
 import {getObjectTypedEntries} from '@augment-vir/common';
 import {calculateRelativeDate, getNowInUserTimezone} from 'date-vir';
 import {css, defineElement, html, listen, nothing} from 'element-vir';
-import {ViraButton, ViraInput} from 'vira';
+import {ViraButton} from 'vira';
 import {AppTab} from '../../../data/app-tabs.js';
 import type {JobSearchRecords} from '../../../data/job-search-record.js';
 import type {JobAppFullRoute} from '../../../data/router.js';
@@ -109,22 +109,6 @@ export const JobViewAllRecords = defineElement<{
         const searchQuery: string = inputs.currentRoute.search?.search[0] || '';
 
         return html`
-            Search
-            <${ViraInput.assign({
-                value: searchQuery,
-                showClearButton: true,
-            })}
-                ${listen(ViraInput.events.valueChange, (event) => {
-                    dispatch(
-                        new ChangeRouteEvent({
-                            search: {
-                                search: [event.detail],
-                            },
-                        }),
-                    );
-                })}
-            ></${ViraInput}>
-
             ${searchQuery
                 ? html`
                       <${JobRecordSearch.assign({

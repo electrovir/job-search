@@ -9,9 +9,10 @@ import {
     isAsyncError,
     isResolved,
     listen,
+    nothing,
 } from 'element-vir';
 import {assertValidShape, isValidShape} from 'object-shape-tester';
-import {ViraButton, ViraIcon, ViraLink} from 'vira';
+import {ViraButton, ViraIcon, ViraInput, ViraLink} from 'vira';
 import {AppTab, appTabDisplay} from '../../data/app-tabs.js';
 import {loadLocalData, saveDataLocally} from '../../data/data-store.js';
 import {jobSearchRecordsShape, type JobSearchRecords} from '../../data/job-search-record.js';
@@ -52,6 +53,8 @@ export const JobApp = defineElementNoInputs({
 
         nav {
             display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
             justify-content: space-between;
         }
 
@@ -62,6 +65,7 @@ export const JobApp = defineElementNoInputs({
 
         .tab-buttons,
         .external-links {
+            flex-shrink: 0;
             display: flex;
             gap: 8px;
             align-items: flex-start;
@@ -169,6 +173,25 @@ export const JobApp = defineElementNoInputs({
             `;
         });
 
+        const searchInputTemplate =
+            currentTab === AppTab.View
+                ? html`
+                      Search
+                      <${ViraInput.assign({
+                          value: state.currentRoute.search?.search[0] || '',
+                          showClearButton: true,
+                      })}
+                          ${listen(ViraInput.events.valueChange, (event) => {
+                              state.router.setRoute({
+                                  search: {
+                                      search: [event.detail],
+                                  },
+                              });
+                          })}
+                      ></${ViraInput}>
+                  `
+                : nothing;
+
         return html`
             <div
                 class="app-wrapper"
@@ -195,6 +218,7 @@ export const JobApp = defineElementNoInputs({
                 <nav>
                     <div class="tab-buttons">${tabButtonTemplates}</div>
                     <div class="external-links">
+                        ${searchInputTemplate}
                         <${ViraLink.assign({
                             link: {
                                 newTab: true,

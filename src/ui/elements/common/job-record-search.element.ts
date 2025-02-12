@@ -57,7 +57,7 @@ export const JobRecordSearch = defineElement<{
         dispatch(new events.searchResultCount(searchResults.length));
 
         if (!searchResults.length) {
-            return 'No records match this search';
+            return 'No records match this search.';
         }
 
         return Object.entries(groupedSearchResults).map(
