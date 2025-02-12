@@ -17,7 +17,6 @@ export const defaultJobAppRoute: JobAppFullRoute = {
 export const jobAppRouter = new SpaRouter<JobAppPaths, ValidJobAppSearch, undefined>({
     basePath: 'job-search',
     sanitizeRoute(rawRoute) {
-        console.log({rawRoute});
         const tab = checkWrap.isEnumValue(rawRoute.paths[0], AppTab) || defaultJobAppRoute.paths[0];
 
         const searchQuery = rawRoute.search?.search?.[0];
@@ -39,8 +38,6 @@ export const jobAppRouter = new SpaRouter<JobAppPaths, ValidJobAppSearch, undefi
             search: sanitizedSearch,
             paths: sanitizedPaths,
         };
-
-        console.log({newRoute});
 
         return newRoute;
     },
