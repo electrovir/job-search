@@ -1,20 +1,17 @@
-import {getObjectTypedEntries, getOrSet} from '@augment-vir/common';
-import {
-    calculateRelativeDate,
-    DateUnit,
-    getEndDate,
-    getNowInUserTimezone,
-    getStartDate,
-    orderedMonthNames,
-    toTimestamp,
-    type FullDate,
-} from 'date-vir';
+import {getObjectTypedEntries} from '@augment-vir/common';
+import {calculateRelativeDate, getNowInUserTimezone} from 'date-vir';
 import {css, defineElement, html, listen, nothing} from 'element-vir';
 import {ViraButton, ViraInput} from 'vira';
 import {AppTab} from '../../../data/app-tabs.js';
-import type {JobSearchRecord, JobSearchRecords} from '../../../data/job-search-record.js';
+import type {JobSearchRecords} from '../../../data/job-search-record.js';
 import type {JobAppFullRoute} from '../../../data/router.js';
+import {
+    generateWeekKey,
+    organizeDataIntoWeeks,
+    prettifyWeekKey,
+} from '../../../data/weekly-records.js';
 import {ChangeRouteEvent} from '../../events/change-route.event.js';
+import {JobRecordSearch} from '../common/job-record-search.element.js';
 import {JobViewRecord} from '../common/job-view-record.element.js';
 
 export const JobViewAllRecords = defineElement<{
@@ -44,10 +41,6 @@ export const JobViewAllRecords = defineElement<{
         .all-weeks {
             flex-shrink: 0;
         }
-
-        .week-data {
-            word-break: break-all;
-        }
     `,
     render({inputs, dispatch}) {
         const organizedData = organizeDataIntoWeeks(inputs.data);
@@ -70,12 +63,10 @@ export const JobViewAllRecords = defineElement<{
                 buttonWeeks,
             ]) => {
                 const buttons = Object.keys(buttonWeeks).map((buttonWeekKey) => {
-                    const buttonText = `${buttonWeekKey
-                        .replace('-', ' - ')
-                        .replaceAll(
-                            /(\D)(\d)/g,
-                            '$1 $2',
-                        )} (${buttonWeeks[buttonWeekKey]?.length || 0})`;
+                    const buttonText = prettifyWeekKey(
+                        buttonWeekKey,
+                        buttonWeeks[buttonWeekKey]?.length || 0,
+                    );
 
                     const buttonYearWeekKey = `${buttonYear}${buttonWeekKey}`;
                     return html`
@@ -117,22 +108,6 @@ export const JobViewAllRecords = defineElement<{
 
         const searchQuery: string = inputs.currentRoute.search?.search[0] || '';
 
-        const searchResults = inputs.data.filter((contact) => {
-            return Object.entries(contact).some((entry) => {
-                if (
-                    entry[0] === 'id' ||
-                    entry[0] === 'contactDate' ||
-                    typeof entry[1] !== 'string'
-                ) {
-                    return false;
-                }
-
-                return String(entry[1]).toLowerCase().includes(searchQuery.toLowerCase());
-            });
-        });
-
-        const groupedSearchResults = organizeDataIntoWeeks(searchResults);
-
         return html`
             Search
             <${ViraInput.assign({
@@ -152,33 +127,10 @@ export const JobViewAllRecords = defineElement<{
 
             ${searchQuery
                 ? html`
-                      <div class="week-data">
-                          ${searchResults.length
-                              ? Object.entries(groupedSearchResults).map(
-                                    ([
-                                        year,
-                                        weeks,
-                                    ]) => html`
-                                        ${year}
-                                        ${Object.entries(weeks).map(
-                                            ([
-                                                weekKey,
-                                                records,
-                                            ]) => html`
-                                                <h3>${weekKey}</h3>
-                                                ${records.map(
-                                                    (record) => html`
-                                                        <${JobViewRecord.assign({
-                                                            record,
-                                                        })}></${JobViewRecord}>
-                                                    `,
-                                                )}
-                                            `,
-                                        )}
-                                    `,
-                                )
-                              : 'No records match this search'}
-                      </div>
+                      <${JobRecordSearch.assign({
+                          allRecords: inputs.data,
+                          searchQuery,
+                      })}></${JobRecordSearch}>
                   `
                 : html`
                       <div class="contact-container">
@@ -202,37 +154,3 @@ export const JobViewAllRecords = defineElement<{
         `;
     },
 });
-
-type RecordWeeks = {[Year in number]: {[WeekKey in string]: JobSearchRecord[]}};
-
-function generateWeekKey(date: Readonly<FullDate>): string {
-    const startOfWeek = getStartDate(date, DateUnit.Week);
-    const endOfWeek = getEndDate(date, DateUnit.Week);
-
-    const startOfWeekMonthName = orderedMonthNames[startOfWeek.month - 1]?.slice(0, 3);
-    const endOfWeekMonthName = orderedMonthNames[endOfWeek.month - 1]?.slice(0, 3);
-
-    return `${startOfWeekMonthName}${startOfWeek.day}-${endOfWeekMonthName}${endOfWeek.day}`;
-}
-
-function organizeDataIntoWeeks(data: Readonly<JobSearchRecords>): RecordWeeks {
-    const allWeeks: RecordWeeks = {};
-
-    const sorted = data.toSorted((a, b) => toTimestamp(b.contactDate) - toTimestamp(a.contactDate));
-
-    sorted.forEach((searchRecord) => {
-        const endOfWeek = getEndDate(searchRecord.contactDate, DateUnit.Week);
-
-        const yearWeeks = getOrSet(allWeeks, endOfWeek.year, () => {
-            return {};
-        });
-
-        const weekKey = generateWeekKey(searchRecord.contactDate);
-
-        getOrSet(yearWeeks, weekKey, () => {
-            return [];
-        }).push(searchRecord);
-    });
-
-    return allWeeks;
-}

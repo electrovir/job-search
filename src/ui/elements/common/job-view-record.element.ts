@@ -17,9 +17,11 @@ export const JobViewRecord = defineElement<{
     styles: css`
         th {
             text-align: right;
+            white-space: nowrap;
         }
 
         td {
+            word-break: break-all;
             padding-left: 8px;
         }
 
