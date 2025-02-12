@@ -1,10 +1,19 @@
-import {css, defineElementEvent, defineElementNoInputs, html, listen} from 'element-vir';
-import {type JobSearchRecord} from '../../../data/job-search-record.js';
+import {check, checkWrap} from '@augment-vir/assert';
+import {css, defineElement, defineElementEvent, html, listen} from 'element-vir';
+import {noNativeSpacing} from 'vira';
+import {JobSearchRecord, JobSearchRecords} from '../../../data/job-search-record.js';
 import {JobSearchRecordEdit} from '../common/job-record-edit.element.js';
+import {JobRecordSearch} from '../common/job-record-search.element.js';
 
-export const JobCreateSearchRecord = defineElementNoInputs({
+export const JobCreateSearchRecord = defineElement<{allRecords: Readonly<JobSearchRecords>}>()({
     tagName: 'job-create-search-record',
     styles: css`
+        :host {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 64px;
+        }
+
         th {
             text-align: right;
         }
@@ -22,18 +31,89 @@ export const JobCreateSearchRecord = defineElementNoInputs({
         .saved-subtitle {
             opacity: 0.5;
         }
+
+        .entry {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        p,
+        h2 {
+            ${noNativeSpacing};
+        }
+
+        .warning {
+            font-weight: bold;
+            color: darkorange;
+        }
+
+        .search-results {
+            flex-basis: 500px;
+            max-width: 500px;
+            flex-grow: 1;
+        }
+
+        ${JobRecordSearch} {
+            margin-left: 16px;
+            opacity: 0.5;
+        }
     `,
     events: {
         searchRecordCreate: defineElementEvent<JobSearchRecord>(),
     },
-    render({dispatch, events}) {
+    stateInitStatic: {
+        searchResultCount: 0,
+        currentEdits: undefined as undefined | JobSearchRecord,
+    },
+    render({dispatch, events, inputs, state, updateState}) {
+        const searchQuery: string[] = state.currentEdits
+            ? [
+                  checkWrap.isLengthAtLeast(state.currentEdits.companyName, 3),
+                  checkWrap.isLengthAtLeast(state.currentEdits.contactName, 3),
+                  checkWrap.isLengthAtLeast(state.currentEdits.contactEmail, 3),
+                  checkWrap.isLengthAtLeast(state.currentEdits.posting, 3),
+              ].filter(check.isTruthy)
+            : [];
+
+        const warningMessage = state.searchResultCount
+            ? 'Warning: you may have already entered this job.'
+            : '';
+
         return html`
-            <h2>New Job Search</h2>
-            <${JobSearchRecordEdit.assign({existingRecord: undefined})}
-                ${listen(JobSearchRecordEdit.events.searchRecordSave, (event) => {
-                    dispatch(new events.searchRecordCreate(event.detail));
+            <div class="entry">
+                <h2>Enter Job Application</h2>
+                <${JobSearchRecordEdit.assign({existingRecord: undefined})}
+                    ${listen(JobSearchRecordEdit.events.searchRecordSave, (event) => {
+                        dispatch(new events.searchRecordCreate(event.detail));
+                    })}
+                    ${listen(JobSearchRecordEdit.events.searchRecordEdit, (event) => {
+                        updateState({
+                            currentEdits: event.detail,
+                        });
+                    })}
+                ></${JobSearchRecordEdit}>
+                <p class="warning">${warningMessage}</p>
+            </div>
+            <div class="search-results">
+                <h3>Past entries:</h3>
+                <${JobRecordSearch.assign({
+                    allRecords: inputs.allRecords,
+                    searchQuery,
+                    searchKeys: [
+                        'companyName',
+                        'contactName',
+                        'contactEmail',
+                        'posting',
+                    ],
                 })}
-            ></${JobSearchRecordEdit}>
+                    ${listen(JobRecordSearch.events.searchResultCount, (event) => {
+                        updateState({
+                            searchResultCount: event.detail,
+                        });
+                    })}
+                ></${JobRecordSearch}>
+            </div>
         `;
     },
 });

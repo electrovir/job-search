@@ -52,6 +52,7 @@ export const JobSearchRecordEdit = defineElement<{
     `,
     events: {
         searchRecordSave: defineElementEvent<Readonly<JobSearchRecord>>(),
+        searchRecordEdit: defineElementEvent<Readonly<JobSearchRecord>>(),
     },
     stateInitStatic: {
         isSaving: false,
@@ -67,13 +68,19 @@ export const JobSearchRecordEdit = defineElement<{
                 },
             );
 
+            const currentSearchRecord =
+                inputs.existingRecord ||
+                (isValidShape(cachedEntry, jobSearchRecordShape)
+                    ? cachedEntry
+                    : createDefaultRecordEntry());
+
             updateState({
-                currentSearchRecord:
-                    inputs.existingRecord ||
-                    (isValidShape(cachedEntry, jobSearchRecordShape)
-                        ? cachedEntry
-                        : createDefaultRecordEntry()),
+                currentSearchRecord,
             });
+
+            if (!inputs.existingRecord) {
+                dispatch(new events.searchRecordEdit(currentSearchRecord));
+            }
         }
         const currentSearchRecord = state.currentSearchRecord;
         assert.isDefined(currentSearchRecord);
@@ -93,6 +100,7 @@ export const JobSearchRecordEdit = defineElement<{
             updateState({
                 currentSearchRecord: newRecord,
             });
+            dispatch(new events.searchRecordEdit(newRecord));
         }
 
         const inputTemplates = getObjectTypedEntries(currentSearchRecord).map(

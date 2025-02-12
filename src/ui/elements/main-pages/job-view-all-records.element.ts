@@ -15,7 +15,7 @@ import {JobRecordSearch} from '../common/job-record-search.element.js';
 import {JobViewRecord} from '../common/job-view-record.element.js';
 
 export const JobViewAllRecords = defineElement<{
-    data: Readonly<JobSearchRecords>;
+    allRecords: Readonly<JobSearchRecords>;
     currentRoute: Readonly<JobAppFullRoute>;
 }>()({
     tagName: 'job-view-all-records',
@@ -43,7 +43,7 @@ export const JobViewAllRecords = defineElement<{
         }
     `,
     render({inputs, dispatch}) {
-        const organizedData = organizeDataIntoWeeks(inputs.data);
+        const organizedData = organizeDataIntoWeeks(inputs.allRecords);
         const now = getNowInUserTimezone();
 
         const lastWeekKey = generateWeekKey(calculateRelativeDate(now, {weeks: -1}));
@@ -128,8 +128,8 @@ export const JobViewAllRecords = defineElement<{
             ${searchQuery
                 ? html`
                       <${JobRecordSearch.assign({
-                          allRecords: inputs.data,
-                          searchQuery,
+                          allRecords: inputs.allRecords,
+                          searchQuery: [searchQuery],
                       })}></${JobRecordSearch}>
                   `
                 : html`

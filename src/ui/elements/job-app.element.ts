@@ -87,7 +87,7 @@ export const JobApp = defineElementNoInputs({
         }
     `,
     stateInitStatic: {
-        data: asyncProp({
+        records: asyncProp({
             defaultValue: loadLocalData(),
         }),
         router: jobAppRouter,
@@ -101,35 +101,37 @@ export const JobApp = defineElementNoInputs({
     render({state}) {
         async function updateDate(data: JobSearchRecords) {
             await saveDataLocally(data);
-            state.data.setValue(data);
+            state.records.setValue(data);
         }
 
-        const currentData = state.data.value;
+        const currentRecords = state.records.value;
 
-        if (isAsyncError(currentData)) {
+        if (isAsyncError(currentRecords)) {
             return html`
-                <p class="error">${extractErrorMessage(currentData)}</p>
+                <p class="error">${extractErrorMessage(currentRecords)}</p>
             `;
         }
 
         const currentTab = String(state.currentRoute.paths[0]);
 
-        const tabTemplate = isResolved(currentData)
-            ? currentTab === AppTab.Raw || !isValidShape(currentData, jobSearchRecordsShape)
+        const tabTemplate = isResolved(currentRecords)
+            ? currentTab === AppTab.Raw || !isValidShape(currentRecords, jobSearchRecordsShape)
                 ? html`
                       <${JobRawData.assign({
-                          data: currentData,
+                          data: currentRecords,
                       })}></${JobRawData}>
                   `
                 : currentTab === AppTab.Entry
                   ? html`
-                        <${JobCreateSearchRecord}
+                        <${JobCreateSearchRecord.assign({
+                            allRecords: checkWrap.isArray(currentRecords) || [],
+                        })}
                             ${listen(
                                 JobCreateSearchRecord.events.searchRecordCreate,
                                 async (event) => {
-                                    if (check.isArray(currentData)) {
+                                    if (check.isArray(currentRecords)) {
                                         const records: JobSearchRecords = [
-                                            ...currentData,
+                                            ...currentRecords,
                                             event.detail,
                                         ];
 
@@ -143,7 +145,7 @@ export const JobApp = defineElementNoInputs({
                     ? html`
                           <${JobViewAllRecords.assign({
                               currentRoute: state.currentRoute,
-                              data: checkWrap.isArray(currentData) || [],
+                              allRecords: checkWrap.isArray(currentRecords) || [],
                           })}></${JobViewAllRecords}>
                       `
                     : 'UNKNOWN TAB'
@@ -177,9 +179,9 @@ export const JobApp = defineElementNoInputs({
                     await updateDate(event.detail);
                 })}
                 ${listen(UpdateIndividualRecordEvent, async (event) => {
-                    assertValidShape(currentData, jobSearchRecordsShape);
+                    assertValidShape(currentRecords, jobSearchRecordsShape);
 
-                    const updatedData = currentData.map((record) => {
+                    const updatedData = currentRecords.map((record) => {
                         if (record.id === event.detail.id) {
                             return event.detail;
                         } else {

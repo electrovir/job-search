@@ -1,36 +1,60 @@
-import {css, defineElement, html} from 'element-vir';
-import {JobSearchRecords} from '../../../data/job-search-record.js';
+import {getObjectTypedEntries} from '@augment-vir/common';
+import {css, defineElement, defineElementEvent, html, nothing} from 'element-vir';
+import {JobSearchRecords, type JobSearchRecord} from '../../../data/job-search-record.js';
 import {organizeDataIntoWeeks, prettifyWeekKey} from '../../../data/weekly-records.js';
 import {JobViewRecord} from './job-view-record.element.js';
 
 export const JobRecordSearch = defineElement<{
     allRecords: Readonly<JobSearchRecords>;
-    searchQuery: string;
+    searchQuery: string[];
+    searchKeys?: (keyof JobSearchRecord)[];
 }>()({
     tagName: 'job-record-search',
+    events: {
+        searchResultCount: defineElementEvent<number>(),
+    },
     styles: css`
+        :host {
+            display: block;
+        }
+
         h3 {
             border-bottom: 1px solid #aaa;
             padding-bottom: 4px;
             font-weight: normal;
         }
     `,
-    render({inputs}) {
-        const searchResults = inputs.allRecords.filter((contact) => {
-            return Object.entries(contact).some((entry) => {
-                if (
-                    entry[0] === 'id' ||
-                    entry[0] === 'contactDate' ||
-                    typeof entry[1] !== 'string'
-                ) {
-                    return false;
-                }
+    render({inputs, dispatch, events}) {
+        if (!inputs.searchQuery.length) {
+            return nothing;
+        }
 
-                return String(entry[1]).toLowerCase().includes(inputs.searchQuery.toLowerCase());
-            });
+        const searchResults = inputs.allRecords.filter((contact) => {
+            return getObjectTypedEntries(contact).some(
+                ([
+                    key,
+                    value,
+                ]) => {
+                    if (
+                        key === 'id' ||
+                        typeof value !== 'string' ||
+                        (inputs.searchKeys &&
+                            inputs.searchKeys.length &&
+                            !inputs.searchKeys.includes(key))
+                    ) {
+                        return false;
+                    }
+
+                    return inputs.searchQuery.some((query) =>
+                        String(value).toLowerCase().includes(query.toLowerCase()),
+                    );
+                },
+            );
         });
 
         const groupedSearchResults = organizeDataIntoWeeks(searchResults);
+
+        dispatch(new events.searchResultCount(searchResults.length));
 
         if (!searchResults.length) {
             return 'No records match this search';
