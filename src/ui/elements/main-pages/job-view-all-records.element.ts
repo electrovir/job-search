@@ -25,6 +25,12 @@ export const JobViewAllRecords = defineElement<{
     styles: css`
         :host {
             display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .contact-container {
+            display: flex;
             gap: 32px;
         }
 
@@ -112,32 +118,84 @@ export const JobViewAllRecords = defineElement<{
                 organizedData[Number(selectedYear)]?.[selectedWeekKey]) ||
             [];
 
+        const searchResults = inputs.data.filter((contact) => {
+            return Object.entries(contact).some((entry) => {
+                if (
+                    entry[0] === 'id' ||
+                    entry[0] === 'contactDate' ||
+                    typeof entry[1] !== 'string'
+                ) {
+                    return false;
+                }
+
+                return String(entry[1]).toLowerCase().includes(state.searchValue.toLowerCase());
+            });
+        });
+
+        const groupedSearchResults = organizeDataIntoWeeks(searchResults);
+
         return html`
-            <div class="all-weeks">
-                ${buttonTemplates.length ? buttonTemplates : 'No records yet.'}
-            </div>
-            <div class="week-data">
-                Search
-                <${ViraInput.assign({
-                    value: state.searchValue,
-                    showClearButton: true,
+            Search
+            <${ViraInput.assign({
+                value: state.searchValue,
+                showClearButton: true,
+            })}
+                ${listen(ViraInput.events.valueChange, (event) => {
+                    updateState({
+                        searchValue: event.detail,
+                    });
                 })}
-                    ${listen(ViraInput.events.valueChange, (event) => {
-                        updateState({
-                            searchValue: event.detail,
-                        });
-                    })}
-                ></${ViraInput}>
-                ${selectedRecords.length
-                    ? selectedRecords.map(
-                          (record) => html`
-                              <${JobViewRecord.assign({record})}></${JobViewRecord}>
-                          `,
-                      )
-                    : inputs.currentRoute.paths[1]
-                      ? 'No records for this week'
-                      : nothing}
-            </div>
+            ></${ViraInput}>
+
+            ${state.searchValue
+                ? html`
+                      <div class="week-data">
+                          ${searchResults.length
+                              ? Object.entries(groupedSearchResults).map(
+                                    ([
+                                        year,
+                                        weeks,
+                                    ]) => html`
+                                        ${year}
+                                        ${Object.entries(weeks).map(
+                                            ([
+                                                weekKey,
+                                                records,
+                                            ]) => html`
+                                                <h3>${weekKey}</h3>
+                                                ${records.map(
+                                                    (record) => html`
+                                                        <${JobViewRecord.assign({
+                                                            record,
+                                                        })}></${JobViewRecord}>
+                                                    `,
+                                                )}
+                                            `,
+                                        )}
+                                    `,
+                                )
+                              : 'No records match this search'}
+                      </div>
+                  `
+                : html`
+                      <div class="contact-container">
+                          <div class="all-weeks">
+                              ${buttonTemplates.length ? buttonTemplates : 'No records yet.'}
+                          </div>
+
+                          <div class="week-data">
+                              ${selectedRecords.length
+                                  ? selectedRecords.map(
+                                        (record) => html`
+                                            <${JobViewRecord.assign({record})}></${JobViewRecord}>
+                                        `,
+                                    )
+                                  : inputs.currentRoute.paths[1]
+                                    ? 'No records for this week'
+                                    : nothing}
+                          </div>
+                      </div>
+                  `}
         `;
     },
 });
