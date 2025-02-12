@@ -1,4 +1,4 @@
 import {defineTypedEvent} from 'element-vir';
-import {JobAppRoute} from '../../data/router.js';
+import {JobAppFullRoute} from '../../data/router.js';
 
-export const ChangeRouteEvent = defineTypedEvent<Partial<JobAppRoute>>()('change-route');
+export const ChangeRouteEvent = defineTypedEvent<Partial<JobAppFullRoute>>()('change-route');

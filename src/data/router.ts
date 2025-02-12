@@ -4,36 +4,39 @@ import {AppTab} from './app-tabs.js';
 
 export type JobAppPaths = [AppTab.Entry] | [AppTab.Raw] | [AppTab.View, string] | [AppTab.View];
 
-export type JobAppRoute = Required<FullRoute<JobAppPaths, undefined, undefined>>;
+type ValidJobAppSearch = {search: string[]} | undefined;
 
-export const defaultJobAppRoute: JobAppRoute = {
+export type JobAppFullRoute = Required<FullRoute<JobAppPaths, ValidJobAppSearch, undefined>>;
+
+export const defaultJobAppRoute: JobAppFullRoute = {
     paths: [AppTab.Entry],
     hash: undefined,
     search: undefined,
 };
 
-export const jobAppRouter = new SpaRouter<JobAppPaths, undefined, undefined>({
+export const jobAppRouter = new SpaRouter<JobAppPaths, ValidJobAppSearch, undefined>({
     basePath: 'job-search',
     sanitizeRoute(rawRoute) {
         const tab = checkWrap.isEnumValue(rawRoute.paths[0], AppTab) || defaultJobAppRoute.paths[0];
 
-        if (tab === AppTab.View) {
-            return {
-                ...defaultJobAppRoute,
-                paths: (
-                    [
-                        tab,
-                        rawRoute.paths[1],
-                    ] satisfies [AppTab.View, string | undefined]
-                ).filter(check.isTruthy) as [AppTab.View, string] | [AppTab.View],
-            };
-        } else {
-            return {
-                ...defaultJobAppRoute,
-                paths: [
-                    tab,
-                ],
-            };
-        }
+        const searchQuery = rawRoute.search?.search?.[0];
+        const sanitizedSearch: ValidJobAppSearch =
+            tab === AppTab.View ? (searchQuery ? {search: [searchQuery]} : undefined) : undefined;
+
+        const sanitizedPaths: JobAppPaths =
+            tab === AppTab.View
+                ? ((
+                      [
+                          tab,
+                          rawRoute.paths[1],
+                      ] satisfies [AppTab.View, string | undefined]
+                  ).filter(check.isTruthy) as [AppTab.View, string] | [AppTab.View])
+                : [tab];
+
+        return {
+            ...defaultJobAppRoute,
+            search: sanitizedSearch,
+            paths: sanitizedPaths,
+        };
     },
 });

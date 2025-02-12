@@ -13,13 +13,13 @@ import {css, defineElement, html, listen, nothing} from 'element-vir';
 import {ViraButton, ViraInput} from 'vira';
 import {AppTab} from '../../../data/app-tabs.js';
 import type {JobSearchRecord, JobSearchRecords} from '../../../data/job-search-record.js';
-import type {JobAppRoute} from '../../../data/router.js';
+import type {JobAppFullRoute} from '../../../data/router.js';
 import {ChangeRouteEvent} from '../../events/change-route.event.js';
 import {JobViewRecord} from '../common/job-view-record.element.js';
 
 export const JobViewAllRecords = defineElement<{
     data: Readonly<JobSearchRecords>;
-    currentRoute: Readonly<JobAppRoute>;
+    currentRoute: Readonly<JobAppFullRoute>;
 }>()({
     tagName: 'job-view-all-records',
     styles: css`
@@ -49,10 +49,7 @@ export const JobViewAllRecords = defineElement<{
             word-break: break-all;
         }
     `,
-    stateInitStatic: {
-        searchValue: '',
-    },
-    render({state, updateState, inputs, dispatch}) {
+    render({inputs, dispatch}) {
         const organizedData = organizeDataIntoWeeks(inputs.data);
         const now = getNowInUserTimezone();
 
@@ -118,6 +115,8 @@ export const JobViewAllRecords = defineElement<{
                 organizedData[Number(selectedYear)]?.[selectedWeekKey]) ||
             [];
 
+        const searchQuery: string = inputs.currentRoute.search?.search[0] || '';
+
         const searchResults = inputs.data.filter((contact) => {
             return Object.entries(contact).some((entry) => {
                 if (
@@ -128,7 +127,7 @@ export const JobViewAllRecords = defineElement<{
                     return false;
                 }
 
-                return String(entry[1]).toLowerCase().includes(state.searchValue.toLowerCase());
+                return String(entry[1]).toLowerCase().includes(searchQuery.toLowerCase());
             });
         });
 
@@ -137,17 +136,21 @@ export const JobViewAllRecords = defineElement<{
         return html`
             Search
             <${ViraInput.assign({
-                value: state.searchValue,
+                value: searchQuery,
                 showClearButton: true,
             })}
                 ${listen(ViraInput.events.valueChange, (event) => {
-                    updateState({
-                        searchValue: event.detail,
-                    });
+                    dispatch(
+                        new ChangeRouteEvent({
+                            search: {
+                                search: [event.detail],
+                            },
+                        }),
+                    );
                 })}
             ></${ViraInput}>
 
-            ${state.searchValue
+            ${searchQuery
                 ? html`
                       <div class="week-data">
                           ${searchResults.length
