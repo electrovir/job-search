@@ -1,5 +1,11 @@
 import {assert, check} from '@augment-vir/assert';
-import {getObjectTypedEntries, wait, wrapInTry, type AnyObject} from '@augment-vir/common';
+import {
+    createUuidV4,
+    getObjectTypedEntries,
+    wait,
+    wrapInTry,
+    type AnyObject,
+} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
 import {
     FullDatePart,
@@ -22,6 +28,7 @@ function createDefaultRecordEntry() {
     return {
         ...jobSearchRecordShape.defaultValue,
         contactDate: getNowInUserTimezone(),
+        id: createUuidV4(),
     };
 }
 

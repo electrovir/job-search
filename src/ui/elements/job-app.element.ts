@@ -1,5 +1,5 @@
 import {check, checkWrap} from '@augment-vir/assert';
-import {extractErrorMessage, getEnumValues} from '@augment-vir/common';
+import {extractErrorMessage, getEnumValues, stringify} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
 import {
     asyncProp,
@@ -203,14 +203,24 @@ export const JobApp = defineElementNoInputs({
                 })}
                 ${listen(UpdateIndividualRecordEvent, async (event) => {
                     assertValidShape(currentRecords, jobSearchRecordsShape);
+                    let updateCount = 0;
 
                     const updatedData = currentRecords.map((record) => {
                         if (record.id === event.detail.id) {
+                            updateCount++;
                             return event.detail;
                         } else {
                             return record;
                         }
                     });
+
+                    if (updateCount > 1) {
+                        throw new Error(
+                            `Tried to update multiple records: ${stringify(event.detail)}`,
+                        );
+                    } else if (!updateCount) {
+                        throw new Error(`Found no records to update: ${stringify(event.detail)}`);
+                    }
 
                     await updateDate(updatedData);
                 })}

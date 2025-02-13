@@ -1,4 +1,4 @@
-import {log, randomString, type AnyObject} from '@augment-vir/common';
+import {createUuidV4, log, randomString, type AnyObject} from '@augment-vir/common';
 import {getNowInUserTimezone, toSimpleDatePartString} from 'date-vir';
 import localforage from 'localforage-esm';
 import {assertValidShape} from 'object-shape-tester';
@@ -20,6 +20,7 @@ export async function loadLocalData() {
     if (firstLoad) {
         firstLoad = false;
         await migrateData();
+        await repairData();
     }
 
     return (await jobSearchRecordsStore.getItem<AnyObject[]>(dataKey)) || [];
@@ -59,4 +60,19 @@ async function migrateData(): Promise<void> {
     log.info(`Migration completed. New data version: '${nextVersion}'`);
 
     return migrateData();
+}
+
+async function repairData() {
+    const currentData = (await jobSearchRecordsStore.getItem<AnyObject[]>(dataKey)) || [];
+    let modified = false as boolean;
+    currentData.forEach((entry) => {
+        if (!entry.id) {
+            modified = true;
+            entry.id = createUuidV4();
+        }
+    });
+
+    if (modified) {
+        await jobSearchRecordsStore.setItem(dataKey, currentData);
+    }
 }

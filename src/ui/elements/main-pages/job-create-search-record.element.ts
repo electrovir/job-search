@@ -96,6 +96,9 @@ export const JobCreateSearchRecord = defineElement<{allRecords: Readonly<JobSear
                 <h2>Enter Job Application</h2>
                 <${JobSearchRecordEdit.assign({existingRecord: undefined})}
                     ${listen(JobSearchRecordEdit.events.searchRecordSave, (event) => {
+                        updateState({
+                            searchResultCount: 0,
+                        });
                         dispatch(new events.searchRecordCreate(event.detail));
                     })}
                     ${listen(JobSearchRecordEdit.events.searchRecordEdit, (event) => {
