@@ -1653,7 +1653,7 @@ does not match RegExp
             <div class="entry">
                 <h2>Enter Job Application</h2>
                 <${Qt.assign({existingRecord:void 0})}
-                    ${z(Qt.events.searchRecordSave,a=>{i({searchResultCount:0}),e(new t.searchRecordCreate(a.detail))})}
+                    ${z(Qt.events.searchRecordSave,a=>{i({searchResultCount:0,currentEdits:void 0}),e(new t.searchRecordCreate(a.detail))})}
                     ${z(Qt.events.searchRecordEdit,a=>{i({currentEdits:a.detail})})}
                 ></${Qt}>
                 <p class="warning">${o}</p>
