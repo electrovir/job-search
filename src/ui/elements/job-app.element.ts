@@ -96,11 +96,31 @@ export const JobApp = defineElementNoInputs({
         }),
         router: jobAppRouter,
         currentRoute: defaultJobAppRoute,
+
+        cleanup: undefined as undefined | (() => void),
     },
     init({state, updateState}) {
         state.router.listen(true, (route) => {
             updateState({currentRoute: route});
         });
+
+        if (!state.cleanup) {
+            /** Keep data relatively in sync. */
+            const intervalId = window.setInterval(async () => {
+                state.records.setValue(await loadLocalData());
+            }, 10_000);
+            updateState({
+                cleanup: () => {
+                    window.clearInterval(intervalId);
+                },
+            });
+        }
+    },
+    cleanup({state, updateState}) {
+        if (state.cleanup) {
+            state.cleanup();
+            updateState({cleanup: undefined});
+        }
     },
     render({state}) {
         async function updateDate(data: JobSearchRecords) {
