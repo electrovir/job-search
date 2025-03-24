@@ -31,8 +31,10 @@ export const JobViewRecord = defineElement<{
             cursor: pointer;
         }
     `,
-    stateInitStatic: {
-        editing: false,
+    state() {
+        return {
+            editing: false,
+        };
     },
     render({inputs, state, updateState, dispatch}) {
         const dateString = toSimpleDatePartString(inputs.record.contactDate);

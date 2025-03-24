@@ -61,10 +61,12 @@ export const JobSearchRecordEdit = defineElement<{
         searchRecordSave: defineElementEvent<Readonly<JobSearchRecord>>(),
         searchRecordEdit: defineElementEvent<Readonly<JobSearchRecord>>(),
     },
-    stateInitStatic: {
-        isSaving: false,
-        savedSubtitle: '',
-        currentSearchRecord: undefined as undefined | Readonly<JobSearchRecord>,
+    state() {
+        return {
+            isSaving: false,
+            savedSubtitle: '',
+            currentSearchRecord: undefined as undefined | Readonly<JobSearchRecord>,
+        };
     },
     render({state, updateState, dispatch, events, inputs}) {
         if (!state.currentSearchRecord) {

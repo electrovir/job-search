@@ -7,6 +7,12 @@ import {JobRecordSearch} from '../common/job-record-search.element.js';
 
 export const JobCreateSearchRecord = defineElement<{allRecords: Readonly<JobSearchRecords>}>()({
     tagName: 'job-create-search-record',
+    state() {
+        return {
+            searchResultCount: 0,
+            currentEdits: undefined as undefined | JobSearchRecord,
+        };
+    },
     hostClasses: {
         'job-create-search-record-no-past-entries': ({state}) => !state.searchResultCount,
     },
@@ -68,10 +74,6 @@ export const JobCreateSearchRecord = defineElement<{allRecords: Readonly<JobSear
     `,
     events: {
         searchRecordCreate: defineElementEvent<JobSearchRecord>(),
-    },
-    stateInitStatic: {
-        searchResultCount: 0,
-        currentEdits: undefined as undefined | JobSearchRecord,
     },
     render({dispatch, events, inputs, state, updateState}) {
         const searchQuery: string[] = state.currentEdits

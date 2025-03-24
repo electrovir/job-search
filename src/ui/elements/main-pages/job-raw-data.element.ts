@@ -37,9 +37,11 @@ export const JobRawData = defineElement<{data: unknown}>()({
             color: red;
         }
     `,
-    stateInitStatic: {
-        inputJson: '',
-        isSaving: false,
+    state() {
+        return {
+            inputJson: '',
+            isSaving: false,
+        };
     },
     render({inputs, state, updateState, dispatch}) {
         const json = state.inputJson || JSON.stringify(inputs.data, null, 4);

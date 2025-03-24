@@ -1,12 +1,12 @@
 import {check, checkWrap} from '@augment-vir/assert';
-import {SpaRouter, type FullRoute} from 'spa-router-vir';
+import {SpaRouter, type FullSpaRoute} from 'spa-router-vir';
 import {AppTab} from './app-tabs.js';
 
 export type JobAppPaths = [AppTab.Entry] | [AppTab.Raw] | [AppTab.View, string] | [AppTab.View];
 
 type ValidJobAppSearch = {search: string[]} | undefined;
 
-export type JobAppFullRoute = Required<FullRoute<JobAppPaths, ValidJobAppSearch, undefined>>;
+export type JobAppFullRoute = FullSpaRoute<JobAppPaths, ValidJobAppSearch, undefined>;
 
 export const defaultJobAppRoute: JobAppFullRoute = {
     paths: [AppTab.Entry],

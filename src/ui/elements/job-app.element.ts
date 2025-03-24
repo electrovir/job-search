@@ -1,16 +1,7 @@
 import {check, checkWrap} from '@augment-vir/assert';
 import {extractErrorMessage, getEnumValues, stringify} from '@augment-vir/common';
 import {extractEventTarget} from '@augment-vir/web';
-import {
-    asyncProp,
-    css,
-    defineElementNoInputs,
-    html,
-    isAsyncError,
-    isResolved,
-    listen,
-    nothing,
-} from 'element-vir';
+import {asyncProp, css, defineElementNoInputs, html, listen, nothing} from 'element-vir';
 import {assertValidShape, isValidShape} from 'object-shape-tester';
 import {ViraButton, ViraIcon, ViraInput, ViraLink} from 'vira';
 import {AppTab, appTabDisplay} from '../../data/app-tabs.js';
@@ -90,14 +81,16 @@ export const JobApp = defineElementNoInputs({
             color: red;
         }
     `,
-    stateInitStatic: {
-        records: asyncProp({
-            defaultValue: loadLocalData(),
-        }),
-        router: jobAppRouter,
-        currentRoute: defaultJobAppRoute,
+    state() {
+        return {
+            records: asyncProp({
+                defaultValue: loadLocalData(),
+            }),
+            router: jobAppRouter,
+            currentRoute: defaultJobAppRoute,
 
-        cleanup: undefined as undefined | (() => void),
+            cleanup: undefined as undefined | (() => void),
+        };
     },
     init({state, updateState}) {
         state.router.listen(true, (route) => {
@@ -128,9 +121,9 @@ export const JobApp = defineElementNoInputs({
             state.records.setValue(data);
         }
 
-        const currentRecords = state.records.value;
+        const currentRecords = state.records.settledValue;
 
-        if (isAsyncError(currentRecords)) {
+        if (currentRecords instanceof Error) {
             return html`
                 <p class="error">${extractErrorMessage(currentRecords)}</p>
             `;
@@ -138,7 +131,7 @@ export const JobApp = defineElementNoInputs({
 
         const currentTab = String(state.currentRoute.paths[0]);
 
-        const tabTemplate = isResolved(currentRecords)
+        const tabTemplate = currentRecords
             ? currentTab === AppTab.Raw || !isValidShape(currentRecords, jobSearchRecordsShape)
                 ? html`
                       <${JobRawData.assign({
