@@ -24,11 +24,12 @@ import {
     type JobSearchRecord,
 } from '../../../data/job-search-record.js';
 
-function createDefaultRecordEntry() {
+function createDefaultRecordEntry(): JobSearchRecord {
     return {
         ...jobSearchRecordShape.defaultValue,
         contactDate: getNowInUserTimezone(),
         id: createUuidV4(),
+        contactMethod: 'applied online',
     };
 }
 
